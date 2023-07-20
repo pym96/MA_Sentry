@@ -41,8 +41,11 @@
 ROS 是目前比较流行的所谓“元操作系统”。其主要是提供了一些常用驱动，以及导航、视觉、机械臂控制等功能插件，一般在 RoboMaster 中由电控组去做的面向硬件的机器人控制，以及一些常用的接口组件。前期我们没有采用 ROS，是因为没有那么多通信，没有那么多特殊的传感器，也还不需要用 Gym 去给强化学习算法训练提供一个采样空间。现在传感器的数量（双目、IMU、单目）肯定是上升的，且要在实际部署前做比较完整的仿真，就需要考虑如何把现有的控制代码和 Gym 完善的对接起来。
 
 即使我们完全想明白这套算法体系，要将算法流畅（ 60 帧以上）的在 NUC 或类似体积的计算平台上，以足够可控的成本运行起来，且保持很强的可扩展性，其难度绝对不亚于设计算法本身。首当其冲的是模型的低精度量化。对视觉模型，低精度量化已经比较成熟。其量化原理和流程可以参考：
-AI-Performance：Int8量化-介绍（一）https://zhuanlan.zhihu.com/p/58182172
-AI-Performance：Int8量化 - python实现以及代码分析（二）https://zhuanlan.zhihu.com/p/58208691
+AI-Performance：Int8量化-介绍（一）
+https://zhuanlan.zhihu.com/p/58182172
+
+AI-Performance：Int8量化 - python实现以及代码分析（二）
+https://zhuanlan.zhihu.com/p/58208691
 
 这套方案在视觉的各种 backbone 上用，比如 ShuffleNet MobileNet ResNet 这种结构，已经是比较成熟的了，低精度量化后掉点并不严重。有代表性的比如RangiLyu/nanodet，Megvii-BaseDetection/YOLOX。比较适合在廉价的 NPU 上做部署。考虑到机器人的总体算力有限，堆模型精度的边际效益是并不高的，用这种轻量级模型经过修改，表现应该是可以接受的。
 
