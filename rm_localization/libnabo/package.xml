@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>libnabo</name>
+  <version>1.0.7</version>
+  <description>libnabo is a fast K Nearest Neighbour library for low-dimensional spaces.</description>
+
+  <maintainer email="ynava@anybotics.com">Yoshua Nava</maintainer>
+  <maintainer email="mwulf@anybotics.com">Maximilian Wulf</maintainer>
+  <license>BSD</license>
+  <url type="repository">https://github.com/anybotics/libnabo</url>
+  <author email="stephane.magnenat@mavt.ethz.ch">Stéphane Magnenat</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>cmake</build_depend>
+  <depend>eigen</depend>
+  <depend>boost</depend>
+  <exec_depend>catkin</exec_depend>
+  <test_depend>libflann-dev</test_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
