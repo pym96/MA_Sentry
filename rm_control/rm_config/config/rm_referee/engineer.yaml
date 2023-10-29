@@ -1,0 +1,53 @@
+rm_referee:
+  robot_type: engineer
+  send_ui_queue_delay: 0.15
+  add_ui_frequency: 5
+  add_ui_max_times: 10
+  ui:
+    trigger_change:
+      - name: "step"
+        config: { start_position: [ 850, 700 ], size: 15, width: 2, title: "step:" }
+      - name: "reversal"
+        config: { start_position: [ 50, 550 ], size: 15, width: 2, title: "reversal:" }
+      - name: "stone"
+        config: { start_position: [ 50, 600 ], size: 15, width: 2, title: "stone:" }
+      - name: "drag"
+        config: { start_position: [ 50, 650 ], size: 15, width: 2, title: "drag:" }
+      - name: "temperature"
+        config: { start_position: [ 50, 750 ], size: 15, width: 2, title: "temp:" }
+      - name: "gripper"
+        config: { start_position: [ 50, 700 ], size: 15, width: 2, title: "gripper:" }
+      - name: "exchange"
+        config: { start_position: [ 50, 800 ], size: 15, width: 2, title: "exchange:" }
+      - name: "planning"
+        config: { start_position: [ 850, 650 ], size: 15, width: 2, title: "planning:" }
+    time_change:
+      - name: "temperature"
+        config: { start_position: [ 400, 650 ], size: 15, width: 2, delay: 0.5 }
+    fixed:
+      - name: "line1"
+        config: { type: "line", width: 3, color: "orange",
+                  start_position: [ 1900, 540 ], end_position: [ 0, 540 ] }
+      - name: "lf_sky1"
+        config: { type: "line", width: 4, color: "yellow",
+                  start_position: [ 872, 0 ], end_position: [ 874, 1080 ] }
+      - name: "lf_sky5"
+        config: { type: "line", width: 4, color: "yellow",
+                  start_position: [ 1053, 0 ], end_position: [ 1053, 1080 ] }
+
+
+
+    flash:
+      - name: "ore"
+        config: { start_position: [ 960, 720 ], size: 15, width: 2,
+                  color: "yellow", content: "Ore will released after 10s", delay: 0.4 }
+      - name: "armor0"
+        config: { type: "circle", width: 3, radius: 50, color: "yellow", delay: 0.75 }
+      - name: "armor1"
+        config: { type: "circle", width: 3, radius: 50, color: "yellow", delay: 0.75 }
+      - name: "armor2"
+        config: { type: "circle", width: 3, radius: 50, color: "yellow", delay: 0.75 }
+      - name: "armor3"
+        config: { type: "circle", width: 3, radius: 50, color: "yellow", delay: 0.75 }
+      - name: "aux"
+        config: { type: "line", width: 2, color: "cyan", delay: 0.1 }

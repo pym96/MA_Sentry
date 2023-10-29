@@ -1,0 +1,53 @@
+<launch>
+
+    <rosparam file="$(find rm_config)/config/vision/sentry.yaml" command="load"/>
+
+    <node pkg="nodelet" type="nodelet" name="lower_vision_nodelet" args="manager"
+          output="screen">
+        <param name="num_worker_threads" value="8"/>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="lower_camera"
+          args="load galaxy_camera/GalaxyCameraNodelet lower_vision_nodelet"
+          output="screen">
+        <remap from="trigger_time" to="rm_hw/lower_gimbal_imu/trigger_time"/>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="lower_debayer"
+          args="load image_proc/debayer lower_vision_nodelet"
+          output="screen">
+        <remap from="image_raw" to="/galaxy_camera/lower_camera/image_raw"/>
+        <remap from="image_mono" to="/galaxy_camera/lower_camera/image_mono"/>
+        <remap from="image_color" to="/galaxy_camera/lower_camera/image_color"/>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="lower_rectify"
+          args="load image_proc/rectify lower_vision_nodelet"
+          output="screen">
+        <remap from="image_mono" to="/galaxy_camera/lower_camera/image_mono"/>
+        <remap from="camera_info" to="/galaxy_camera/lower_camera/camera_info"/>
+        <remap from="image_rect" to="/galaxy_camera/lower_camera/image_rect"/>
+    </node>
+
+    <!--    <node pkg="nodelet" type="nodelet" name="upper_vision_nodelet" args="manager"-->
+    <!--          output="screen">-->
+    <!--        <param name="num_worker_threads" value="8"/>-->
+    <!--    </node>-->
+    <!--    <node pkg="nodelet" type="nodelet" name="upper_camera"-->
+    <!--          args="load galaxy_camera/GalaxyCameraNodelet upper_vision_nodelet"-->
+    <!--          output="screen">-->
+    <!--        <remap from="trigger_time" to="rm_hw/upper_gimbal_imu/trigger_time"/>-->
+    <!--    </node>-->
+    <!--    <node pkg="nodelet" type="nodelet" name="upper_debayer"-->
+    <!--          args="load image_proc/debayer upper_vision_nodelet"-->
+    <!--          output="screen">-->
+    <!--        <remap from="image_raw" to="/galaxy_camera/upper_camera/image_raw"/>-->
+    <!--        <remap from="image_mono" to="/galaxy_camera/upper_camera/image_mono"/>-->
+    <!--        <remap from="image_color" to="/galaxy_camera/upper_camera/image_color"/>-->
+    <!--    </node>-->
+    <!--    <node pkg="nodelet" type="nodelet" name="upper_rectify"-->
+    <!--          args="load image_proc/rectify upper_vision_nodelet"-->
+    <!--          output="screen">-->
+    <!--        <remap from="image_mono" to="/galaxy_camera/upper_camera/image_mono"/>-->
+    <!--        <remap from="camera_info" to="/galaxy_camera/upper_camera/camera_info"/>-->
+    <!--        <remap from="image_rect" to="/galaxy_camera/upper_camera/image_rect"/>-->
+    <!--    </node>-->
+
+</launch>

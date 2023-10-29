@@ -1,0 +1,271 @@
+controllers:
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 100
+  robot_state_controller:
+    type: robot_state_controller/RobotStateController
+    publish_rate: 100
+
+  arm_trajectory_controller:
+    type: effort_controllers/JointTrajectoryController
+    joints:
+      - joint1
+      - joint2
+      - joint3
+      - joint4
+      - joint5
+      - joint6
+    gains:
+      joint1: { p: 26000.0, i: 0, d: 600.0, i_clamp_max: 0, i_clamp_min: 0, antiwindup: true, publish_state: true }
+      joint2: { p: 30000.0, i: 0, d: 600.0, i_clamp_max: 0, i_clamp_min: 0, antiwindup: true, publish_state: true }
+      joint3: { p: 24000.0, i: 0, d: 650.0, i_clamp_max: 0, i_clamp_min: 0, antiwindup: true, publish_state: true }
+      joint4: { p: 600.0, i: 12.0, d: 5., i_clamp_max: 60, i_clamp_min: -60.0, antiwindup: true, publish_state: true }
+      joint5: { p: 60.0, i: 0, d: 1., i_clamp_max: 0, i_clamp_min: 0, antiwindup: true, publish_state: true }
+      joint6: { p: 20.0, i: 0, d: 0.8, i_clamp_max: 0, i_clamp_min: 0, antiwindup: true, publish_state: true }
+
+  mimic_joint1_controller:
+    type: mimic_joint_controller/MimicJointController
+    target_joint_name: "joint1"
+    joint: "mimic_joint1"
+    pid: { p: 12000.0, i: 0, d: 500, i_clamp_max: 0, i_clamp_min: 0, antiwindup: true, publish_state: true }
+
+  chassis_controller:
+    # ChassisBase
+    type: rm_chassis_controllers/SwerveController
+    # ChassisBase
+    publish_rate: 100
+    enable_odom_tf: true
+    publish_odom_tf: true
+    power:
+      effort_coeff: 10.0
+      vel_coeff: 0.0060
+      power_offset: -8.41
+    twist_angular: 0.5233
+    timeout: 0.1
+    pid_follow: { p: 5.0, i: 0, d: 0.3, i_max: 0.0, i_min: 0.0, antiwindup: true, publish_state: true }
+    twist_covariance_diagonal: [ 0.001, 0.001, 0.001, 0.001, 0.001, 0.001 ]
+
+    # SwerveController
+    modules:
+      left_front:
+        position: [ 0.175, 0.175 ]
+        pivot:
+          joint: left_front_pivot_joint
+          <<: &pivot_setting
+            offset: 0.
+            pid: { p: 5, i: 50, d: 0, i_clamp_max: 0.4, i_clamp_min: -0.4, antiwindup: true, publish_state: true }
+        wheel:
+          joint: left_front_wheel_joint
+          <<: &wheel_setting
+            radius: 0.049
+            pid: { p: 0.4, i: 0, d: 0.0, i_max: 0.0, i_min: 0.0, antiwindup: true, publish_state: true }
+      right_front:
+        position: [ 0.175, -0.175 ]
+        pivot:
+          joint: right_front_pivot_joint
+          <<: *pivot_setting
+        wheel:
+          joint: right_front_wheel_joint
+          <<: *wheel_setting
+      left_back:
+        position: [ -0.175, 0.175 ]
+        pivot:
+          joint: left_back_pivot_joint
+          <<: *pivot_setting
+        wheel:
+          joint: left_back_wheel_joint
+          <<: *wheel_setting
+      right_back:
+        position: [ -0.175, -0.175 ]
+        pivot:
+          joint: right_back_pivot_joint
+          <<: *pivot_setting
+        wheel:
+          joint: right_back_wheel_joint
+          <<: *wheel_setting
+
+  multi_dof_controller:
+    type: multi_dof_controller/Controller
+    joints:
+      pitch_front_joint:
+        position:
+          joint: pitch_front_joint
+          pid: { p: 0.8, i: 0., d: 0.1, i_clamp_max: 0., i_clamp_min: 0., antiwindup: true, publish_state: true }
+        velocity:
+          joint: pitch_front_joint
+          pid: { p: 0.02, i: 0., d: 0, i_clamp_max: 0., i_clamp_min: 0., antiwindup: true, publish_state: true }
+      pitch_behind_joint:
+        position:
+          joint: pitch_behind_joint
+          pid: { p: 0.8, i: 0., d: 0.1, i_clamp_max: 0., i_clamp_min: 0., antiwindup: true, publish_state: true }
+        velocity:
+          joint: pitch_behind_joint
+          pid: { p: 0.02, i: 0., d: 0., i_clamp_max: 0., i_clamp_min: 0., antiwindup: true, publish_state: true }
+      roll_left_joint:
+        position:
+          joint: roll_left_joint
+          pid: { p: 0.6, i: 0., d: 0.1, i_clamp_max: 0., i_clamp_min: 0., antiwindup: true, publish_state: true }
+        velocity:
+          joint: roll_left_joint
+          pid: { p: 0.02, i: 0., d: 0., i_clamp_max: 0., i_clamp_min: 0., antiwindup: true, publish_state: true }
+      roll_right_joint:
+        position:
+          joint: roll_right_joint
+          pid: { p: 0.6, i: 0., d: 0.1, i_clamp_max: 0., i_clamp_min: 0., antiwindup: true, publish_state: true }
+        velocity:
+          joint: roll_right_joint
+          pid: { p: 0.02, i: 0., d: 0, i_clamp_max: 0., i_clamp_min: 0., antiwindup: true, publish_state: true }
+    motions:
+      pitch:
+        velocity_config: [ 1.3,1.3,0.3,-0.3 ]
+        velocity_max_speed: 15
+        position_config: [ 0.5,0.5,0.1,-0.1 ]
+        position_per_step: 1
+        is_need_reverse: [ 1,1,0,0 ]
+      roll:
+        velocity_config: [ -0.5,0.5,1.3,1.3 ]
+        velocity_max_speed: 15
+        position_config: [ -0.5,0.5,0.5,0.5 ]
+        is_need_reverse: [ 0,0,1,1 ]
+        position_per_step: 1
+      z:
+        velocity_config: [ -1.,1.,-1.,1. ]
+        velocity_max_speed: 15
+        position_config: [ -0.5,0.5,-0.5,0.5 ]
+        is_need_reverse: [ 1,1,1,1 ]
+        position_per_step: 1
+
+  gimbal_controller:
+    type: rm_gimbal_controllers/Controller
+    yaw:
+      joint: "yaw_joint"
+      pid: { p: 0.5, i: 0, d: 0.01, i_clamp_max: 0, i_clamp_min: 0, antiwindup: true, publish_state: true }
+    pitch:
+      joint: "pitch_joint"
+      pid: { p: 0.5, i: 0, d: 0.008, i_clamp_max: 0, i_clamp_min: 0, antiwindup: true, publish_state: true }
+    feedforward:
+      gravity: 0.0
+      enable_gravity_compensation: false
+      mass_origin: [ 0.0,0.0,0.0 ]
+    bullet_solver:
+      resistance_coff_qd_10: 0.45
+      resistance_coff_qd_15: 1.0
+      resistance_coff_qd_16: 0.7
+      resistance_coff_qd_18: 0.55
+      resistance_coff_qd_30: 3.0
+      g: 9.81
+      delay: 0.1
+      dt: 0.001
+      timeout: 0.001
+      publish_rate: 50
+
+  gpio_controller:
+    type: gpio_controller/Controller
+    gpios: [ "gripper" ]
+
+  joint1_calibration_controller:
+    type: rm_calibration_controllers/JointCalibrationController
+    joint: joint1
+    actuator: [ joint1_motor ]
+    search_velocity: 0.6
+    threshold: 0.001
+    pid: { p: 220, i: 0, d: 0, i_clamp_max: 0.5, i_clamp_min: 0, antiwindup: true }
+
+  mimic_joint1_calibration_controller:
+    type: rm_calibration_controllers/JointCalibrationController
+    joint: mimic_joint1
+    actuator: [ mimic_joint1_motor ]
+    search_velocity: 0.6
+    threshold: 0.001
+    pid: { p: 200, i: 0, d: 0, i_clamp_max: 0.0, i_clamp_min: 0, antiwindup: true }
+
+  joint2_calibration_controller:
+    type: rm_calibration_controllers/JointCalibrationController
+    joint: joint2
+    actuator: [ joint2_motor ]
+    search_velocity: 0.7
+    threshold: 0.001
+    pid: { p: 110, i: 0, d: 0, i_clamp_max: 0.0, i_clamp_min: 0, antiwindup: true }
+
+  joint3_calibration_controller:
+    type: rm_calibration_controllers/JointCalibrationController
+    joint: joint3
+    actuator: [ joint3_motor ]
+    search_velocity: -1
+    threshold: 0.001
+    pid: { p: 25, i: 0, d: 0, i_clamp_max: 0.0, i_clamp_min: 0, antiwindup: true }
+
+  joint4_calibration_controller:
+    type: rm_calibration_controllers/JointCalibrationController
+    joint: joint4
+    actuator: [ joint4_motor ]
+    search_velocity: -2.3
+    threshold: 0.05
+    pid: { p: 1.4, i: 0, d: 0, i_clamp_max: 0.0, i_clamp_min: 0, antiwindup: true }
+
+  joint5_calibration_controller:
+    type: rm_calibration_controllers/JointCalibrationController
+    joint: joint5
+    actuator: [ joint5_motor ]
+    search_velocity: 5
+    threshold: 0.001
+    pid: { p: 0.3, i: 0, d: 0, i_clamp_max: 0.0, i_clamp_min: 0, antiwindup: true }
+
+  joint6_calibration_controller:
+    type: rm_calibration_controllers/JointCalibrationController
+    joint: joint6
+    actuator: [ joint6_motor ]
+    search_velocity: -3.5
+    threshold: 0.01
+    pid: { p: 1.3, i: 0, d: 0, i_clamp_max: 0.0, i_clamp_min: 0, antiwindup: true }
+    return:
+      joint: joint6
+      actuators: [ joint6_motor ]
+      target_position: -0.194
+      threshold: 0.05
+      pid: { p: 1.4, i: 0, d: 1, i_clamp_max: 0, i_clamp_min: 0, antiwindup: true, publish_state: true }
+
+  pitch_calibration_controller:
+    type: rm_calibration_controllers/JointCalibrationController
+    joint: pitch_joint
+    actuator: [ pitch_joint_motor ]
+    search_velocity: 2.5
+    threshold: 0.01
+    pid: { p: 0.05, i: 0, d: 0.0, i_clamp_max: 0.0, i_clamp_min: 0.0, antiwindup: true }
+    return:
+      joint: pitch_joint
+      actuators: [ pitch_joint_motor ]
+      target_position: 0
+      threshold: 0.05
+      pid: { p: 0.8, i: 0, d: 0.008, i_clamp_max: 0, i_clamp_min: 0, antiwindup: true, publish_state: true }
+
+  yaw_calibration_controller:
+    type: rm_calibration_controllers/JointCalibrationController
+    joint: yaw_joint
+    actuator: [ yaw_joint_motor ]
+    search_velocity: 4
+    threshold: 0.01
+    pid: { p: 0.05, i: 0, d: 0.0, i_clamp_max: 0.0, i_clamp_min: 0.0, antiwindup: true }
+    return:
+      joint: yaw_joint
+      actuators: [ yaw_joint_motor ]
+      target_position: -0.00286054491
+      threshold: 0.05
+      pid: { p: 1., i: 0, d: 0.03, i_clamp_max: 0, i_clamp_min: 0, antiwindup: true, publish_state: true }
+
+
+
+
+
+  drag_calibration_controller:
+    type: rm_calibration_controllers/JointCalibrationController
+    joint: drag_joint
+    actuator: [ drag_joint_motor ]
+    search_velocity: 2.0
+    threshold: 0.01
+    pid: { p: 1.2, i: 0, d: 0., i_clamp_max: 0.0, i_clamp_min: 0, antiwindup: true }
+
+  drag_controller:
+    type: effort_controllers/JointPositionController
+    joint: drag_joint
+    pid: { p: 30., i: 0., d: 4.0, i_max: 0.0, i_min: 0.0, antiwindup: true, publish_state: true }

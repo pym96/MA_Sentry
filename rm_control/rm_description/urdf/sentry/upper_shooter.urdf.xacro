@@ -1,0 +1,88 @@
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <link name="upper_left_friction">
+        <inertial>
+             <mass value="0.15269"/>
+             <origin xyz="0 0 -0.004"/>
+             <inertia ixx="4.776e-5" ixy="2.192e-7" ixz="-1.28e-7" iyy="4.759e-5"
+                      iyz="-1.683e-7" izz="6.148e-5"/>
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://rm_description/meshes/sentry/upper_friction_wheel.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+        <!--<collision>
+            <origin xyz="0 -0.00125 0.012" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.072 0.07 0.055"/>
+            </geometry>
+        </collision>-->
+    </link>
+
+    <joint name="upper_left_friction_wheel_joint" type="continuous">
+        <origin xyz="47e-3 36.50e-3 -0.4e-3" rpy="0 0 0"/>
+        <parent link="upper_pitch"/>
+        <child link="upper_left_friction"/>
+        <axis xyz="0 0 1 "/>
+    </joint>
+
+    <link name="upper_right_friction">
+        <inertial>
+             <mass value="0.15269"/>
+             <origin xyz="0 0 -0.004"/>
+             <inertia ixx="4.776e-5" ixy="2.192e-7" ixz="-1.28e-7" iyy="4.759e-5"
+                      iyz="-1.683e-7" izz="6.148e-5"/>
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://rm_description/meshes/sentry/upper_friction_wheel.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+        <!--<collision>
+            <origin xyz="0 0.00125 0.012" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.072 0.07 0.055"/>
+            </geometry>
+        </collision>-->
+    </link>
+
+    <joint name="upper_right_friction_wheel_joint" type="continuous">
+        <origin xyz="47e-3 -36.50e-3 -0.4e-3" rpy="0 0 0"/>
+        <parent link="upper_pitch"/>
+        <child link="upper_right_friction"/>
+        <axis xyz="0 0 1 "/>
+    </joint>
+
+    <link name="upper_trigger">
+        <inertial>
+            <mass value="344.827e-3"/>
+            <origin xyz="-26.584e-3 0.526e-3 14.311e-3"/>
+            <inertia ixx="2.365e-4" ixy="-100.189e-9" ixz="1.146e-4" iyy="6.707e-4"
+                     iyz="81.455e-9" izz="6.916e-4"/>
+        </inertial>
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="package://rm_description/meshes/sentry/upper_trigger.stl" scale="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0.006" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.105 0.104 0.045"/>
+            </geometry>
+        </collision>
+    </link>
+
+    <joint name="upper_trigger_joint" type="continuous">
+        <origin xyz="-0.142e-3 -23.51e-3 85.467e-3" rpy="0 0 0"/>
+        <dynamics damping="0.0" friction="0.01"/>
+        <parent link="base_link"/>
+        <child link="upper_trigger"/>
+        <axis xyz="0 0 1 "/>
+    </joint>
+
+</robot>

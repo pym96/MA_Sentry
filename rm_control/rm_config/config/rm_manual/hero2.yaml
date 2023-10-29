@@ -1,0 +1,114 @@
+rm_manual:
+  robot_type: "hero"
+  chassis_calibrate_motor: [ ]
+  gimbal_calibrate_motor: [ "pitch_joint_motor","yaw_joint_motor" ]
+  shooter_calibrate_motor: [ "trigger_joint_motor" ]
+  chassis:
+    topic: "/cmd_chassis"
+    accel_x:
+      - [ 50.0,99.0 ]
+    accel_y:
+      - [ 50.0,99.0 ]
+    accel_z:
+      - [ 50.0,99.0 ]
+    safety_power: 60
+    capacitor_threshold: 0.2
+    charge_power: 20
+    extra_power: 50
+    burst_power: 220
+    buffer_threshold: 10
+    power_gain: 0.85
+  vel:
+    topic: "/cmd_vel"
+    power_limit_topic: "/cmd_chassis"
+    max_linear_x:
+      - [ 55.0,1.75 ]
+      - [ 80.0,2.25 ]
+      - [ 220.0,3.8 ]
+    max_linear_y:
+      - [ 55.0,1.0 ]
+      - [ 80.0,1.43 ]
+      - [ 220.0,3.8 ]
+    max_angular_z:
+      - [ 50.0,5.5 ]
+      - [ 80.0,9.25 ]
+      - [ 220.0,9.42 ]
+    gyro_move_reduction: 0.50
+    gyro_rotate_reduction: 0.50
+  gimbal:
+    topic: "/controllers/gimbal_controller/command"
+    max_yaw_vel: 31.4
+    max_pitch_vel: 8.37
+    track_timeout: 0.5
+    eject_sensitivity: 0.38
+    finish_turning_threshold: 2.9
+    target_cost_function:
+      k_pos: 1.0
+      k_vel: 0.0
+      k_hp: 0.0
+      k_freq: 99.0
+      timeout: 0.1
+  shooter:
+    topic: "/controllers/shooter_controller/command"
+    gimbal_error_tolerance: 0.08
+    target_acceleration_tolerance: 1.0
+    accleration_moving_average_num: 10
+    speed_10m_per_speed: 15.4
+    speed_15m_per_speed: 14.0
+    speed_16m_per_speed: 15.4
+    speed_18m_per_speed: 18.0
+    speed_30m_per_speed: 30.0
+    wheel_speed_10: 560.0
+    wheel_speed_16: 560.0
+    extra_wheel_speed_once: 5.0
+    heat_limit:
+      low_shoot_frequency: 1
+      high_shoot_frequency: 3
+      burst_shoot_frequency: 6
+      minimal_shoot_frequency: 1
+      safe_shoot_frequency: 1
+      heat_coeff: 3.0
+      type: "ID1_42MM"
+  detection_switch:
+    fail_limit: 10
+    service_name: "/Processor/status_switch"
+  armor_target_switch:
+    fail_limit: 10
+    service_name: "/outpost_status_switch"
+
+  controllers_list:
+    state_controllers:
+      - controllers/robot_state_controller
+      - controllers/joint_state_controller
+    main_controllers:
+      - controllers/chassis_controller
+      - controllers/orientation_controller
+      - controllers/gimbal_controller
+      - controllers/shooter_controller
+    calibration_controllers:
+      - controllers/trigger_calibration_controller
+      - controllers/yaw_calibration_controller
+      - controllers/pitch_calibration_controller
+
+  shooter_calibration:
+    - start_controllers:
+        - controllers/trigger_calibration_controller
+      stop_controllers:
+        - controllers/shooter_controller
+      services_name:
+        - /controllers/trigger_calibration_controller/is_calibrated
+
+  gimbal_calibration:
+    - start_controllers:
+        - controllers/pitch_calibration_controller
+      stop_controllers:
+        - controllers/gimbal_controller
+      services_name:
+        - /controllers/pitch_calibration_controller/is_calibrated
+    - start_controllers:
+        - controllers/yaw_calibration_controller
+      stop_controllers:
+        - controllers/gimbal_controller
+        - controllers/chassis_controller
+      services_name:
+        - /controllers/yaw_calibration_controller/is_calibrated

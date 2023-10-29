@@ -1,0 +1,19 @@
+rm_referee:
+  robot_type: dart
+  ui:
+    trigger_change:
+      - name: "dart"
+        config: { start_position: [ 0, 0 ], size: 0, width: 0, title: "step:" }
+    time_change:
+      - name: "temperature"
+        config: { start_position: [ 0, 0 ], size: 0, width: 0, delay: 0.5 }
+    fixed:
+      - name: "ground_stone1"
+        config: { type: "line", width: 0, color: "orange",
+                  start_position: [ 0, 0 ], end_position: [ 0, 0 ] }
+
+
+    flash:
+      - name: "spin"
+        config: { start_position: [ 0, 0 ], size: 0, width: 0,
+                  color: "yellow", content: "please spin!!", delay: 1.0 }

@@ -1,0 +1,6 @@
+rm_fsm:
+  power_limit:
+    danger_surplus_: 10.0
+    roll_back_buffer_: 35.0
+    coeff: 0.08
+    multiple: 100.0

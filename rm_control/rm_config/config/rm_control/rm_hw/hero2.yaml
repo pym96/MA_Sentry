@@ -1,0 +1,78 @@
+rm_hw:
+  bus:
+    - can0
+    - can1
+  loop_frequency: 1000
+  cycle_time_error_threshold: 0.001
+  thread_priority: 95
+  # Configurations of the actuators
+  actuators:
+    right_front_wheel_motor:
+      bus: can0
+      id: 0x201
+      type: rm_3508
+      lp_cutoff_frequency: 50
+    left_front_wheel_motor:
+      bus: can0
+      id: 0x202
+      type: rm_3508
+      lp_cutoff_frequency: 50
+    left_back_wheel_motor:
+      bus: can0
+      id: 0x203
+      type: rm_3508
+      lp_cutoff_frequency: 50
+    right_back_wheel_motor:
+      bus: can0
+      id: 0x204
+      type: rm_3508
+      lp_cutoff_frequency: 50
+    yaw_joint_motor:
+      bus: can0
+      id: 0x205
+      type: rm_3508
+      lp_cutoff_frequency: 100
+      need_calibration: true
+    pitch_joint_motor:
+      bus: can1
+      id: 0x203
+      type: rm_3508
+      lp_cutoff_frequency: 100
+      need_calibration: true
+    left_friction_wheel_joint_motor:
+      bus: can1
+      id: 0x201
+      type: rm_3508
+      lp_cutoff_frequency: 60
+    right_friction_wheel_joint_motor:
+      bus: can1
+      id: 0x202
+      type: rm_3508
+      lp_cutoff_frequency: 60
+    trigger_joint_motor:
+      bus: can0
+      id: 0x206
+      type: rm_3508
+      lp_cutoff_frequency: 150
+      need_calibration: true
+  imus:
+    gimbal_imu:
+      frame_id: gimbal_imu
+      bus: can1
+      id: 0x100
+      orientation_covariance_diagonal: [ 0.0012, 0.0012, 0.0012 ]
+      angular_velocity_covariance: [ -0.004447, 0.000659, 0.000389 ]
+      linear_acceleration_covariance: [ 0.01, 0.01, 0.01 ]
+      angular_vel_offset: [ 0.00322562, -0.005990515, 0.001649562 ]
+      angular_vel_coeff: 0.0010652644
+      accel_coeff: 0.0017944335
+      temp_coeff: 0.125
+      temp_offset: 23.0
+      filter: complementary
+      do_bias_estimation: false
+      do_adaptive_gain: true
+      gain_acc: 0.0003
+  gpios:
+    yaw:
+      pin: 657
+      direction: in

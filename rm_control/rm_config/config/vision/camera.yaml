@@ -1,0 +1,12 @@
+camera:
+  image_width: 1280
+  image_height: 1024
+  pixel_format: bgr8
+  camera_info_url: ''
+  camera_name: hk_camera
+  camera_frame_id: camera_optical_frame
+  camera_sn: KE0220040170
+  frame_rate: 1000
+  exposure_auto: false
+  exposure_value: 1000
+  enable_imu_trigger: true

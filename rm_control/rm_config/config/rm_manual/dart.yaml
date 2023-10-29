@@ -1,0 +1,84 @@
+rm_manual:
+  robot_type: "dart"
+  chassis_calibrate_motor: [ ]
+  gimbal_calibrate_motor: [ "left_pitch_joint_motor","right_pitch_joint_motor","yaw_joint_motor" ]
+  shooter_calibrate_motor: [ "trigger_joint_motor" ]
+  dart_list:
+    first_dart:
+      id: 1
+      param: [ 0.0, 404.0, 0.0, 535.0, 0.003251 ]
+      #outpost:offset,qd//base:offset,qd//trigger position
+    second_dart:
+      id: 2
+      param: [ 0.003, 405.0, 0.0, 536.0, 0.008298 ]
+      #outpost:offset,qd//base:offset,qd//trigger position
+    third_dart:
+      id: 3
+      param: [ 0.0, 407.0, 0.0, 535.5, 0.014457 ]
+      #outpost:offset,qd//base:offset,qd//trigger position
+    fourth_dart:
+      id: 4
+      param: [ 0.002, 398.0, 0.0, 535.5, 0.018 ]
+      #outpost:offset,qd//base:offset,qd//trigger position
+
+  targets:
+    outpost:
+      position: [ -0.15895, 0.038539 ] #pitch yaw
+    base:
+      position: [ -0.1488, 0.2584 ] #pitch yaw
+
+  left_pitch:
+    topic: "/controllers/left_pitch_controller/command"
+    scale: 0.04
+    scale_micro: 0.0001
+    joint: "left_pitch_joint"
+  yaw:
+    topic: "/controllers/yaw_controller/command"
+    joint: "yaw_joint"
+  friction_left:
+    topic: "/controllers/left_friction_controller/command"
+    joint: "left_friction_wheel_joint"
+  friction_right:
+    topic: "/controllers/right_friction_controller/command"
+    joint: "right_friction_wheel_joint"
+  trigger:
+    topic: "/controllers/trigger_controller/command"
+    joint: "trigger_joint"
+    upward_vel: -0.003
+
+  controllers_list:
+    state_controllers:
+      - controllers/robot_state_controller
+      - controllers/joint_state_controller
+    main_controllers:
+      - controllers/left_pitch_controller
+      - controllers/yaw_controller
+      - controllers/left_friction_controller
+      - controllers/right_friction_controller
+      - controllers/trigger_controller
+      - controllers/mimic_joint1_controller
+    calibration_controllers:
+      - controllers/left_pitch_calibration_controller
+      - controllers/right_pitch_calibration_controller
+      - controllers/yaw_calibration_controller
+      - controllers/trigger_calibration_controller
+  trigger_calibration:
+    - start_controllers:
+        - controllers/trigger_calibration_controller
+      stop_controllers:
+        - controllers/trigger_controller
+      services_name:
+        - /controllers/trigger_calibration_controller/is_calibrated
+  gimbal_calibration:
+    - start_controllers:
+        - controllers/left_pitch_calibration_controller
+        - controllers/right_pitch_calibration_controller
+        - controllers/yaw_calibration_controller
+      stop_controllers:
+        - controllers/left_pitch_controller
+        - controllers/mimic_joint1_controller
+        - controllers/yaw_controller
+      services_name:
+        - /controllers/left_pitch_calibration_controller/is_calibrated
+        - /controllers/right_pitch_calibration_controller/is_calibrated
+        - /controllers/yaw_calibration_controller/is_calibrated

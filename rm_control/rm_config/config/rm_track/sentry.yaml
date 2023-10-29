@@ -1,0 +1,20 @@
+rm_track:
+  filters:
+    - type: height_filter
+      basic_range: [ 0., 1.5 ]
+      double_check_range: [ 0.5, 1.0 ]
+    - type: distance_filter
+      basic_range: [ 0., 6.0 ]
+      double_check_range: [ 4.0, 6.0 ]
+    - type: confidence_filter
+      basic_range: [ 0.2, 1.0 ]
+      double_check_range: [ 0.2, 0.5 ]
+  selectors:
+    - last_armor
+    - same_id_armor
+    - static_armor
+    - closest_armor
+  linear_kf:
+    Q: [ 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0 ]
+    R: [ 1, 1, 1 ]
+    debug: true

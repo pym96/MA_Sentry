@@ -1,0 +1,27 @@
+<launch>
+
+  <rosparam file="$(find rm_hw)/config/actuator_coefficient.yaml" command="load" ns="rm_hw"/>
+  <rosparam file="$(find rm_chassis_controllers)/test/config/test_standard_chassis.yaml" command="load"/>
+
+  <rosparam file="$(find rm_chassis_controllers)/test/urdf/test_standard_chassis.xacro" command="load"
+            ns="robot_description"/>
+  <rosparam file="$(find rm_fsm)/test/config/test_power_limit.yaml" command="load"/>
+
+  <!--  <rosparam file="$(find rm_gimbal_controllers)/test/test_gimbal.xacro" command="load" ns="robot_description"/>-->
+
+  <node pkg="tf" type="static_transform_publisher" name="" args="0 0 0 0 0 0 1 world odom 500"/>
+
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner"
+        respawn="false"
+        output="screen" args="
+      rm_hw/robot_state_controller
+      rm_hw/joint_state_controller
+      rm_hw/chassis_standard_controller
+"/>
+
+    <node name="rm_hw" pkg="rm_hw" type="rm_hw" respawn="false"/>
+    <node name="dbus_node" pkg="rm_hw" type="dbus_node" respawn="false"/>
+    <node name="rm_fsm" pkg="rm_fsm" type="rm_fsm" respawn="false"/>
+
+</launch>

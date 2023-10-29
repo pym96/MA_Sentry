@@ -1,0 +1,131 @@
+controllers:
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 100
+  robot_state_controller:
+    type: robot_state_controller/RobotStateController
+    publish_rate: 100
+
+  gimbal_calibration_controller:
+    type: rm_calibration_controllers/MechanicalCalibrationController
+    actuator: [ pitch_joint_motor ]
+    velocity:
+      joint: pitch_joint
+      search_velocity: 6.28
+      vel_threshold: 1e-2
+      pid: { p: 0.3, i: 0, d: 0.0, i_clamp_max: 0.0, i_clamp_min: 0.0, antiwindup: true }
+  trigger_calibration_controller:
+    type: rm_calibration_controllers/MechanicalCalibrationController
+    actuator: [ trigger_joint_motor ]
+    velocity:
+      joint: trigger_joint
+      search_velocity: 3.1415
+      vel_threshold: 0.2
+      pid: { p: 0.3, i: 0, d: 0.0, i_clamp_max: 0.0, i_clamp_min: 0.0, antiwindup: true }
+  barrel_calibration_controller:
+    type: rm_calibration_controllers/MechanicalCalibrationController
+    actuator: [ barrel_joint_motor ]
+    velocity:
+      joint: barrel_joint
+      search_velocity: -6.28
+      vel_threshold: 0.001
+      pid: { p: 3.0, i: 15.0, d: 0.0, i_clamp_max: 0.2, i_clamp_min: -0.2, antiwindup: true }
+
+  chassis_controller:
+    type: rm_chassis_controllers/OmniController
+    # ChassisBase
+    publish_rate: 100
+    enable_odom_tf: true
+    publish_odom_tf: true
+    command_source_frame: "base_link"
+    power:
+      effort_coeff: 1.9
+      vel_coeff: 0.0040
+      power_offset: -8.41
+    twist_angular: 0.5233
+    timeout: 0.1
+    pid_follow: { p: 5.0, i: 0, d: 0.3, i_max: 0.0, i_min: 0.0, antiwindup: true, publish_state: true }
+    twist_covariance_diagonal: [ 0.001, 0.001, 0.001, 0.001, 0.001, 0.001 ]
+
+    # OmniController
+    wheels:
+      left_front:
+        pose: [ 0.147, 0.147, 2.356 ]
+        joint: left_front_wheel_joint
+        <<: &wheel_setting
+          roller_angle: 0.
+          radius: 0.07625
+          pid: { p: 0.41, i: 0, d: 0.0, i_max: 0.0, i_min: 0.0, antiwindup: true, publish_state: true }
+      right_front:
+        pose: [ 0.147, -0.147, 0.785 ]
+        joint: right_front_wheel_joint
+        <<: *wheel_setting
+      left_back:
+        pose: [ -0.147, 0.147, -2.356 ]
+        joint: left_back_wheel_joint
+        <<: *wheel_setting
+      right_back:
+        pose: [ -0.147, -0.147, -0.785 ]
+        joint: right_back_wheel_joint
+        <<: *wheel_setting
+
+  orientation_controller:
+    type: rm_orientation_controller/Controller
+    publish_rate: 100
+    name: "gimbal_imu"
+    frame_source: "odom"
+    frame_target: "base_link"
+
+  gimbal_controller:
+    type: rm_gimbal_controllers/Controller
+    yaw:
+      joint: "yaw_joint"
+      pid: { p: 20, i: 34.85, d: 0.82, i_clamp_max: 0.3, i_clamp_min: -0.3, antiwindup: true, publish_state: true }
+      k_chassis_vel: 0.045
+    pitch:
+      joint: "pitch_joint"
+      pid: { p: 22.0, i: 80, d: 0.75, i_clamp_max: 0.6, i_clamp_min: -0.6, antiwindup: true, publish_state: true }
+    chassis_vel:
+      num_data: 100
+      debug: true
+    imu_name: "gimbal_imu"
+    feedforward:
+      gravity: 0.0
+      enable_gravity_compensation: false
+      mass_origin: [ 0.0, 0.0, 0.0 ]
+    bullet_solver:
+      resistance_coff_qd_10: 0.0
+      resistance_coff_qd_15: 0.0
+      resistance_coff_qd_16: 0.0
+      resistance_coff_qd_18: 0.0
+      resistance_coff_qd_30: 0.0
+      g: 9.81
+      delay: 0.03
+      dt: 0.001
+      timeout: 0.001
+      publish_rate: 50
+      max_track_target_vel: 5.0
+
+  shooter_controller:
+    type: rm_shooter_controllers/Controller
+    publish_rate: 50
+    friction_left:
+      joint: "left_friction_wheel_joint"
+      pid: { p: 0.0007, i: 0.005, d: 0.0, i_clamp_max: 0.01, i_clamp_min: -0.01, antiwindup: true, publish_state: true }
+    friction_right:
+      joint: "right_friction_wheel_joint"
+      pid: { p: 0.0007, i: 0.005, d: 0.0, i_clamp_max: 0.01, i_clamp_min: -0.01, antiwindup: true, publish_state: true }
+    trigger:
+      joint: "trigger_joint"
+      pid: { p: 50.0, i: 0.0, d: 1.3, i_clamp_max: 0.0, i_clamp_min: 0.0, antiwindup: true, publish_state: true }
+    push_per_rotation: 9
+    push_qd_threshold: 0.90
+    block_effort: 2.2
+    block_speed: 0.1
+    block_duration: 0.05
+    block_overtime: 0.5
+    anti_block_angle: 0.46
+    anti_block_threshold: 0.1
+    forward_push_threshold: 0.28
+    exit_push_threshold: 0.3
+    extra_wheel_speed: 733.0
