@@ -13,6 +13,7 @@
           controllers/chassis_controller
           "/>
 
+    <!-- This is the part I should config -->
     <node if="$(arg ekf)" pkg="robot_localization" type="ekf_localization_node" name="ekf_localization"
           clear_params="true">
         <rosparam command="load" file="$(find rm_chassis_controllers)/config/localization.yaml"/>
