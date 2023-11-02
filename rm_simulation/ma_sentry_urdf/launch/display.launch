@@ -7,7 +7,8 @@
   <node
     name="joint_state_publisher_gui"
     pkg="joint_state_publisher_gui"
-    type="joint_state_publisher_gui" />
+    type="joint_state_publisher_gui"
+    output="screen" />
   <node
     name="robot_state_publisher"
     pkg="robot_state_publisher"
@@ -15,6 +16,5 @@
   <node
     name="rviz"
     pkg="rviz"
-    type="rviz"
-    args="-d $(find ma_sentry_urdf)/urdf.rviz" />
+    type="rviz"/>
 </launch>
