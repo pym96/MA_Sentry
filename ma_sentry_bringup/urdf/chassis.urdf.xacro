@@ -1,6 +1,6 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:include filename="$(find rm_description)/urdf/common/omni_wheel.urdf.xacro"/>
+    <xacro:include filename="$(find ma_sentry_bringup)/urdf/common/omni_wheel.urdf.xacro"/>
 
     <!-- https://upload.wikimedia.org/wikipedia/commons/5/52/Wheelbase_and_Track.png -->
     <xacro:property name="chassis_radius" value="0.196"/>
@@ -12,13 +12,14 @@
             <inertial>
                 <mass value="12.326"/>
                 <origin xyz="-0.000932  -0.000668  -0.01"/>
-                <inertia ixx="1.924e-1" ixy="-6.458e-4" ixz="5.951352e-3" iyy="2.473e-1"
-                         iyz="-7.22e-4" izz="3.187e-1"/>
+                <inertia ixx="1.924e-1" ixy="-6.458e-4" ixz="5.951352e-3" 
+                         iyy="2.473e-1" iyz="-7.22e-4" 
+                         izz="3.187e-1"/>
             </inertial>
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
-                    <mesh filename="package://rm_description/meshes/standard/base.stl" scale="0.001 0.001 0.001"/>
+                    <mesh filename="package://ma_sentry_bringup/meshes/base.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
             </visual>
             <collision>

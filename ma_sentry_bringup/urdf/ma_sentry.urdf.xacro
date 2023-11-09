@@ -2,9 +2,9 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="sentry">
 
     <xacro:arg name="load_chassis" default="true"/>
-    <xacro:arg name="load_gimbal" default="true"/>
-    <xacro:arg name="load_shooter" default="true"/>
-    <xacro:arg name="use_simulation" default="true"/>
+    <xacro:arg name="load_gimbal" default="false"/>
+    <xacro:arg name="load_shooter" default="false"/>
+    <xacro:arg name="use_simulation" default="false"/>
     <xacro:arg name="roller_type" default="realistic"/>
 
     <xacro:if value="$(arg load_chassis)">
@@ -20,7 +20,7 @@
     </xacro:if>
 
     <xacro:if value="$(arg load_gimbal)">
-        <xacro:include filename="$(find ma_sentry_bringup)/urdf/standard/gimbal.urdf.xacro"/>
+        <xacro:include filename="$(find ma_sentry_bringup)/urdf/gimbal.urdf.xacro"/>
         <xacro:include filename="$(find ma_sentry_bringup)/urdf/sentry/gimbal.transmission.urdf.xacro"/>
         <xacro:gimbal simulation="$(arg use_simulation)"/>
     </xacro:if>
