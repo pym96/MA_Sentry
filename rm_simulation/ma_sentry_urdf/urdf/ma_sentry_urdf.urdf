@@ -55,7 +55,7 @@
     </collision>
   </link>
   <link
-    name="1_Link">
+    name="left_front_wheel_Link">
     <inertial>
       <origin
         xyz="0.00620923170793747 -0.000547653647351432 0.00828135869405194"
@@ -103,12 +103,12 @@
     <parent
       link="chassis" />
     <child
-      link="1_Link" />
+      link="left_front_wheel_Link" />
     <axis
       xyz="0 0 1" />
   </joint>
   <link
-    name="2_Link">
+    name="right_front_wheel_Link">
     <inertial>
       <origin
         xyz="0.00540813251669661 -0.0618677129623183 -0.00959296954912124"
@@ -156,12 +156,12 @@
     <parent
       link="chassis" />
     <child
-      link="2_Link" />
+      link="right_front_wheel_Link" />
     <axis
       xyz="0 0 1" />
   </joint>
   <link
-    name="3_Link">
+    name="right_back_wheel_Link">
     <inertial>
       <origin
         xyz="8.61533397830683E-06 -1.49221961713991E-05 0.00811341709646876"
@@ -209,12 +209,12 @@
     <parent
       link="chassis" />
     <child
-      link="3_Link" />
+      link="right_back_wheel_Link" />
     <axis
       xyz="0 0 1" />
   </joint>
   <link
-    name="4_Link">
+    name="left_back_wheel_Link">
     <inertial>
       <origin
         xyz="-5.04787255499461E-06 -0.0171154756404496 1.51610025517779E-05"
@@ -262,12 +262,12 @@
     <parent
       link="chassis" />
     <child
-      link="4_Link" />
+      link="left_back_wheel_Link" />
     <axis
       xyz="0 0 1" />
   </joint>
   <link
-    name="5_Link">
+    name="gimbal_Link">
     <inertial>
       <origin
         xyz="0.0104546135318662 -0.0225665209249179 0.193242622446725"
@@ -315,7 +315,7 @@
     <parent
       link="chassis" />
     <child
-      link="5_Link" />
+      link="gimbal_Link" />
     <axis
       xyz="0 0 0" />
   </joint>

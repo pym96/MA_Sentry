@@ -1,0 +1,16 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/dan/learn/MA_Sentry/devel/lib/python3/dist-packages",
+        "/home/dan/catkin_ws/install_isolated/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages",
+        "/opt/intel/l_openvino_toolkit_ubuntu20_2023.1.0.12185.47b736f63ed_x86_64/python",
+        "/opt/intel/l_openvino_toolkit_ubuntu20_2023.1.0.12185.47b736f63ed_x86_64/python/python3"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/dan/learn/MA_Sentry/devel/lib/python3/dist-packages",
+        "/home/dan/catkin_ws/install_isolated/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages",
+        "/opt/intel/l_openvino_toolkit_ubuntu20_2023.1.0.12185.47b736f63ed_x86_64/python",
+        "/opt/intel/l_openvino_toolkit_ubuntu20_2023.1.0.12185.47b736f63ed_x86_64/python/python3"
+    ]
+}
