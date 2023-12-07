@@ -1,6 +1,0 @@
-<launch>
-    <rosparam file="$(find rm_config)/config/rm_controllers/my_sentry.yaml" command="load"/>
-    <rosparam file="$(find rm_config)/config/rm_manual/my_sentry.yaml" command="load"/>
-
-    <node name="rm_manual" pkg="rm_manual" type="rm_manual" respawn="false"/>
-</launch>

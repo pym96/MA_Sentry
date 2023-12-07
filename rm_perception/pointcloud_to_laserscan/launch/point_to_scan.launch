@@ -33,9 +33,8 @@
 
 <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" 
          name="pointcloud_to_laserscan">
-         
- <remap from="cloud_in" to="/cloud_registered"/> 
- <param name="target_frame" value="camera_init" />
+ <remap from="cloud_in" to="/velodyne_points"/> 
+ 
  <param name="transform_tolerance" value="0.01" />
  <param name="min_height" value="-0.4" />
  <param name="max_height" value="1" />

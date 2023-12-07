@@ -1,3 +1,0 @@
-tof_radar_controller:
-  type: tof_radar_controller/Controller
-  publish_rate: 50

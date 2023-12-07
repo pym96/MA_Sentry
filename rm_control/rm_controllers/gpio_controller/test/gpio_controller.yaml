@@ -1,4 +1,0 @@
-controllers:
-  gpio_controller:
-    type: gpio_controller/Controller
-    gpios: [ "gripper1", "gripper2", "gripper3" ]

@@ -65,7 +65,7 @@
         <link name="${prefix}_wheel">
             <visual>
                 <geometry>
-                    <mesh filename="package://ma_sentry_bringup/meshes/common/omni_wheel.stl"
+                    <mesh filename="package://ma_sentry_bringup/meshes/omni_wheel.stl"
                           scale="0.001 0.001 0.001"/>
                 </geometry>
             </visual>

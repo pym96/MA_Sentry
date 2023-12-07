@@ -1,0 +1,28 @@
+<launch>
+
+    <!-- Simulation parameters -->
+    <arg name="paused" default="false" />
+    <arg name="use_sim_time" default="true" />
+    <arg name="gui" default="true" />
+    
+    <!-- Start position -->
+    <arg name="x_pos" default="8" />
+    <arg name="y_pos" default="6" />
+    <arg name="z_pos" default="0.1" />
+    <arg name="roll_pos" default="0" />
+    <arg name="pitch_pos" default="0" />
+    <arg name="yaw_pos" default="0" />
+
+    <!-- Automomous exploration Development Enviroment -->
+    <arg name="world_name" defalut="rm_map" />
+    <arg name="checkTerrainConn" defalut="true" />
+    <arg name="maxSpeed" defalut="2" />
+    <arg name="autonomySpeed" defalut="2" />
+    
+    <!-- Launch Gazebo and robot -->
+    <include file="${find ma_simulation}/launch/gazebo_rmuc.launch" />
+
+
+    </include>
+   
+</launch>

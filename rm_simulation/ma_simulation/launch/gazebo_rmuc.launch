@@ -1,0 +1,34 @@
+<launch>
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="verbose" default="true"/>
+  <!--模型车的起点放置位置-->
+  <arg name="x_pos" default="8"/>
+  <arg name="y_pos" default="6"/>
+  <arg name="z_pos" default="0.5"/>
+  <arg name="R_pos" default="0"/>
+  <arg name="P_pos" default="0"/>
+  <arg name="Y_pos" default="0"/>
+  <arg name="World" default="rmuc"/>
+  <arg name="is_open_rviz" default="true"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="false"/>
+    <arg name="gui" value="$(arg gui)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="false"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+    <arg name="world_name" value="$(find ma_simulation)/worlds/$(arg World).world"/>
+  </include>    
+
+  <!-- Load dobot model -->
+
+  <!-- Load controller -->
+  
+
+
+
+
+</launch>
