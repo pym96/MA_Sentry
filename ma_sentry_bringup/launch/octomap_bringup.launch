@@ -1,15 +1,11 @@
 <launch>
 	<node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
-		<param name="resolution" value="0.05" />
+		<param name="resolution" value="0.1" />
+		<param name="frame_id" type="str" value="robot_foor_init" />
+		<param name="sensor_model/max_range" value="1000.0" />
+		<param name="pointcloud_max_z" value="1" />
+		<parma name="pointcloud_min_z" value="0.0" >
 		
-		<!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
-		<param name="frame_id" type="string" value="/camera_init" />
-		
-		<!-- maximum range to integrate (speedup!) -->
-		<param name="sensor_model/max_range" value="5.0" />
-		
-		<!-- data source to integrate (PointCloud2) -->
-		<remap from="cloud_in" to="/cloud_registered" />
-	
+		<remap from="cloud_int" to="/cloud_registered" />
 	</node>
 </launch>

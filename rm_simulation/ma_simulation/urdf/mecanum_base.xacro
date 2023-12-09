@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <robot name="mecanum_base" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <!--<xacro:include filename="$(find sentry_gazebo)/urdf/sc.plugins.xacro" />-->
+    <!--<xacro:include filename="$(find ma_simulation)/urdf/sc.plugins.xacro" />-->
     <material name="blue">
         <color rgba="0 0 0.8 1"/>
     </material>
@@ -36,7 +36,7 @@
                 <!--<pose>0 0 0 0 0 1.57</pose>>-->
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
-                    <mesh filename="package://sentry_gazebo/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+                    <mesh filename="package://ma_simulation/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
             </collision>
 
@@ -44,7 +44,7 @@
                 <!--<pose>0 0 0 0 0 1.57</pose>>-->
                 <origin rpy="0 0 0" xyz="0 0 0"/>
                 <geometry>
-                    <mesh filename="package://sentry_gazebo/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+                    <mesh filename="package://ma_simulation/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
                 <material name="base_link">
                     <color rgba="0.0 0.0 0.8 1" />
@@ -79,14 +79,14 @@
             <collision>
                 <origin xyz="0 0 -0.07625" rpy="0 0 -1.57"/>
                 <geometry>
-                    <mesh filename="package://sentry_gazebo/meshes/mecanum_right_hands.stl" scale="0.001 0.001 0.001"/>
+                    <mesh filename="package://ma_simulation/meshes/mecanum_right_hands.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
             </collision>
 
             <visual>
                 <origin xyz="0 0 -0.07625" rpy="0 0 -1.57"/>
                 <geometry>
-                    <mesh filename="package://sentry_gazebo/meshes/mecanum_right_hands.stl" scale="0.001 0.001 0.001"/>
+                    <mesh filename="package://ma_simulation/meshes/mecanum_right_hands.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
                 <material name="wheels">
                     <color rgba="0.6 0.6 0.6 1" />
@@ -115,14 +115,14 @@
             <collision>
                 <origin xyz="0 0 -0.07625" rpy="0 0 -1.57"/>
                 <geometry>
-                    <mesh filename="package://sentry_gazebo/meshes/mecanum_left_hands.stl" scale="0.001 0.001 0.001"/>
+                    <mesh filename="package://ma_simulation/meshes/mecanum_left_hands.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
             </collision>
 
             <visual>
                 <origin xyz="0 0 -0.07625" rpy="0 0 -1.57"/>
                 <geometry>
-                    <mesh filename="package://sentry_gazebo/meshes/mecanum_left_hands.stl" scale="0.001 0.001 0.001"/>
+                    <mesh filename="package://ma_simulation/meshes/mecanum_left_hands.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
                 <material name="wheels">
                     <color rgba="0.6 0.6 0.6 1" />
@@ -153,14 +153,14 @@
             <collision>
                 <origin xyz="0 0 -0.07625" rpy="0 0 -1.57"/>
                 <geometry>
-                    <mesh filename="package://sentry_gazebo/meshes/mecanum_left_hands.stl" scale="0.001 0.001 0.001"/>
+                    <mesh filename="package://ma_simulation/meshes/mecanum_left_hands.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
             </collision>
 
             <visual>
                 <origin xyz="0 0 -0.07625" rpy="0 0 -1.57"/>
                 <geometry>
-                    <mesh filename="package://sentry_gazebo/meshes/mecanum_left_hands.stl" scale="0.001 0.001 0.001"/>
+                    <mesh filename="package://ma_simulation/meshes/mecanum_left_hands.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
                 <material name="wheels">
                     <color rgba="0.6 0.6 0.6 1" />
@@ -191,14 +191,14 @@
             <collision>
                 <origin xyz="0 0 -0.07625" rpy="0 0 -1.57"/>
                 <geometry>
-                    <mesh filename="package://sentry_gazebo/meshes/mecanum_right_hands.stl" scale="0.001 0.001 0.001"/>
+                    <mesh filename="package://ma_simulation/meshes/mecanum_right_hands.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
             </collision>
 
             <visual>
                 <origin xyz="0 0 -0.07625" rpy="0 0 -1.57"/>
                 <geometry>
-                    <mesh filename="package://sentry_gazebo/meshes/mecanum_right_hands.stl" scale="0.001 0.001 0.001"/>
+                    <mesh filename="package://ma_simulation/meshes/mecanum_right_hands.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
                 <material name="wheels">
                     <color rgba="0.6 0.6 0.6 1" />
@@ -243,7 +243,7 @@
       <origin xyz="0 0 0.1" rpy="0 0 0" />
   </xacro:VLP-16> 
 
-  <xacro:include filename="$(find sentry_gazebo)/urdf/camera.urdf.xacro"/>
+  <xacro:include filename="$(find ma_simulation)/urdf/camera.urdf.xacro"/>
   <!-- <xacro:camera parent="base_link">
       <origin xyz="0.1 0 0" rpy="0 0 0" />
   </xacro:camera>  -->
