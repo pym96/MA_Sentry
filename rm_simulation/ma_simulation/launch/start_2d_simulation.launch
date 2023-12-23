@@ -1,0 +1,12 @@
+<?xml verison="1.0" ?>
+<launch>
+    <arg name="gui" defalut="true" />
+    <arg name="tf_prefix" defalut="" doc="tf_prefix to be used by gazebo and in the robot's urdf etc" />
+
+    <include file="$(find ma_simulation)/launch/empty_world.launch">
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="tf_prefix" value="$(arg tf_prefix)" />
+    </include>
+
+
+</launch>
