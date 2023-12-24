@@ -1,0 +1,5 @@
+ma_serial:
+  port: "/dev/ttyUSB0"
+  baud_rate: 115200
+  topic: "cmd_vel"
+  time_out: 1000

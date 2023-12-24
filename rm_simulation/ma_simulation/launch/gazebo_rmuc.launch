@@ -23,7 +23,7 @@
     <arg name="world_name" value="$(find ma_simulation)/worlds/$(arg World).world"/>
   </include>    
 
-  <!-- Load dobot model -->
+  <!-- Load robot model -->
   <param name="robot_description" command="$(find xacro)/xacro '$(find ma_simulation)/urdf/base_car.urdf.xacro'" /> 
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-unpause -urdf -param robot_description -model mobile_base -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos)" respawn="false" />
 

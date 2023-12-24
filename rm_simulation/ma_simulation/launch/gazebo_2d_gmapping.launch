@@ -1,0 +1,11 @@
+<launch>
+<!-- Launch rviz using a specific config file -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find ma_simulation)/rviz/mobot_gmapping.rviz"/>
+
+    <!-- Start gmapping -->
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" />
+
+    <!-- Start a teleop program -->
+    <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard" output="screen"/>
+
+</launch>

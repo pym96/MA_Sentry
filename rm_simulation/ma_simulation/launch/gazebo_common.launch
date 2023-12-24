@@ -38,6 +38,6 @@
         <param name="default_vw_min" value="-1.5" />
     </node>
 
-    
+    <!-- Create combined scan topic, maybe 2 lidars will need this -->
 
 </launch>
