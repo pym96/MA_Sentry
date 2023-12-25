@@ -282,7 +282,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="package://simple_meca_car/meshes/hokuyo.dae"/>
+        <mesh filename="package://ma_simulation/meshes/hokuyo.dae"/>
       </geometry>
     </visual>
 

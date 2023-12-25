@@ -26,7 +26,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://simple_meca_car/meshes/base_link.stl" />
+          filename="package://ma_simulation/meshes/base_link.stl" />
       </geometry>
       <material
         name="">
@@ -40,7 +40,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://simple_meca_car/meshes/base_link.stl" />
+          filename="package://ma_simulation/meshes/base_link.stl" />
       </geometry>
     </collision>
   </link>
