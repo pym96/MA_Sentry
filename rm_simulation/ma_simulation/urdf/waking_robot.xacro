@@ -16,8 +16,7 @@
                                 izz="0.01" />
                </inertial>
 	</xacro:macro>
-    <link name="dummy">
-    </link>
+
 	<link name="base_footprint">
    		<visual>
 			<geometry>
@@ -27,10 +26,7 @@
    		</visual>
 		<xacro:default_inertial mass="0.0001"/>
  	</link>
-   <joint name="dummy_joint" type="fixed">
-     <parent link="dummy"/>
-     <child link="base_footprint"/>
-   </joint>
+
 <!--  	<xacro:include filename="$(find nav_sim)/urdf/robot.gazebo" />  -->    
  
 	<gazebo reference="base_footprint">

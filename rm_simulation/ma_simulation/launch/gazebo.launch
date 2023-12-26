@@ -16,13 +16,6 @@
     <arg name="verbose" value="$(arg verbose)" />
   </include>
 
-  <node
-    name="spawn_model"
-    pkg="gazebo_ros"
-    type="spawn_model"
-    args="-file $(find ma_simulation)/urdf/rmus_map_2.urdf -urdf -model ma_2dlidar_robot"
-    output="screen" />
-  
   <!-- Load the URDF into the ROS Parameter Server -->
   <arg name="model" default="$(find ma_simulation)/urdf/waking_robot.xacro" />
  
