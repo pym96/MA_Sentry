@@ -19,15 +19,14 @@
     <rosparam file="$(find ma_simulation)/config/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find ma_simulation)/config/global_costmap_params.yaml" command="load" />
     <rosparam file="$(find ma_simulation)/config/teb_local_planner_params.yaml" command="load" />
-
+    <rosparam file="$(find ma_simulation)/config/move_base_params.yaml" command="load" />
+    <rosparam file="$(find ma_simulation)/config/dwa_local_planner_params.yaml" command="load" />
     <param name="base_global_planner" value="global_planner/GlobalPlanner" />
     <param name="planner_frequency" value="3.0" />
     <param name="planner_patiency" value="5.0" />
     <param name="use_dijkstra" value="false" />
-
     <param name="clearing_rotation_allowed" value="false" />
-    <remap from="/cmd_vel" to="/" />
-    <param name="local_planner" value="$(arg local_planner)"/>
+    <remap from="/cmd_vel" to="/cmd_vel" />
   </node>
 
   <!-- Start a teleop program -->
