@@ -15,18 +15,24 @@ struct SendPacket{
     uint8_t head = 0x5A;
     float linear_x;
     float linear_y;
-    float linear_z;
-    float angular_x;
-    float angular_y;
     float angular_z;
     uint16_t checksum = 0;
-
 }__attribute__((packed));
 
+
+/***
+ * @details: Receive odometry msg.
+ * @param: head, v_x, v_y, v_z, p_x, p_y, p_z, checksum
+*/
 struct ReceviePacket{
-
-
-
+   uint8_t head = 0x5A;
+   int16_t v_x;
+   int16_t v_y;
+   int16_t a_z;
+   int16_t p_x;
+   int16_t p_y;
+   int16_t p_z;
+   uint16_t checksum = 0;
 }__attribute__((packed));
 
 /**

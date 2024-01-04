@@ -57,7 +57,7 @@ uint16_t Get_CRC16_Check_Sum(const uint8_t * pchMessage, uint32_t dwLength, uint
   * @param[in] dwLength : Stream length = Data + checksum
   * @return : True or False (CRC Verify Result)
   */
-uint32_t Verify_CRC16_Check_Sum(const uint8_t * pchMessage, uint32_t dwLength)
+uint32_t verify_crc16_checksum(const uint8_t * pchMessage, uint32_t dwLength)
 {
   uint16_t w_expected = 0;
 
@@ -75,7 +75,7 @@ uint32_t Verify_CRC16_Check_Sum(const uint8_t * pchMessage, uint32_t dwLength)
   * @param[in] dwLength : Stream length = Data + checksum
   * @return none
   */
-void Append_CRC16_Check_Sum(uint8_t * pchMessage, uint32_t dwLength)
+void append_crc16_checksum(uint8_t * pchMessage, uint32_t dwLength)
 {
   uint16_t w_crc = 0;
 
