@@ -1,0 +1,14 @@
+robot_radius: 0.40
+# footprint: [[-0.12, -0.12], [-0.12, 0.12], [0.12,0.12], [0.12, -0.12]] # Other robot shape
+
+obstacle_range: 3.0 # Considered range to detect obstacles
+raytrace_range: 3.0 # Considered range to eliminate obstacles
+
+# Dilation radius
+inflation_radius: 0.5
+# Cost coefficient, the bigger it is, the smaller cost will be
+cost_scaling_factor: 2.0
+
+# Map type
+map_type: costmap
+
