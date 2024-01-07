@@ -23,6 +23,9 @@
 
   <include file="$(find loam_interface)/launch/loam_interface.launch" />
 
+   <!-- Launch FAR planner -->
+   <include file="$(find far_planner)/launch/far_planner.launch"/>
+
   <node launch-prefix="nice" pkg="rviz" type="rviz" name="rvizGA" args="-d $(find vehicle_simulator)/rviz/vehicle_simulator.rviz" respawn="true"/>
 
 </launch>

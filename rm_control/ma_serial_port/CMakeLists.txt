@@ -97,6 +97,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/ma_serial.cc src/crc.cc)
+add_executable(${PROJECT_NAME}_stop src/stop_moving.cc)
 
 
 ## Add cmake target dependencies of the executable
@@ -107,6 +108,11 @@ add_executable(${PROJECT_NAME}_node src/ma_serial.cc src/crc.cc)
 target_link_libraries(${PROJECT_NAME}_node 
   ${catkin_LIBRARIES}
   ${serial_LIBRARIES}
+)
+
+target_link_libraries(${PROJECT_NAME}_stop
+  ${catkin_LIBRARIES}
+  ${serial_LIBRARIES}  
 )
 
 #############

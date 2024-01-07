@@ -30,11 +30,11 @@
 
 
     <!-- Launch autonomous exploration development environment config, load terrian analyse, local navigation -->
-   <include file="$(find vehicle_simulator)/launch/system_rmuc.launch">
+   <!-- <include file="$(find vehicle_simulator)/launch/system_rmuc.launch">
         <arg name="vehicleX" value="$(arg x_pos)"/>
         <arg name="vehicleY" value="$(arg y_pos)"/>
         <arg name="gazebo_gui" value="$(arg gui)"/>
-   </include>
+   </include> -->
 
 
     <!-- Then import global_planner and local_planner -->

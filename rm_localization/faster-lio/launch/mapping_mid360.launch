@@ -13,7 +13,7 @@
     <param name="cube_side_length" type="double" value="1000" />
     <param name="runtime_pos_log_enable" type="bool" value="1" />
     <node pkg="faster_lio" type="run_mapping_online" name="laserMapping" output="screen" /> 
-
+    
 
     <!-- 发布一个雷达body到机器人足端body_foot的静态映射 -->
     <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="tf_pub_1" args="0 0 0.3 -24.46 -11.46 0 body body_foot" /> -->
