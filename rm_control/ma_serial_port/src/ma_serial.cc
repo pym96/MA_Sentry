@@ -12,35 +12,28 @@
 
 serial::Serial ser;
 
-void cmd_velCallBack(const geometry_msgs::Twist::ConstPtr& msg){
+void cmd_velCallBack(const geometry_msgs::TwistStamped::ConstPtr& msg){
     
     try{
         ma_serial_packet::SendPacket packet;
         packet.head = 0x5A;
-        packet.linear_x = msg->linear.x;
-        packet.linear_y = msg->linear.y;
-        packet.angular_z = msg->angular.z;
+        packet.linear_x = msg->twist.linear.x;
+        packet.linear_y = msg->twist.linear.y;
+        packet.angular_z = msg->twist.angular.z;
 
         crc16::append_crc16_checksum(reinterpret_cast<uint8_t *>(&packet), sizeof(packet));
         
+        ROS_INFO("Current msg: v_x: %f, v_y: %f, a_z: %f", msg->twist.linear.x, msg->twist.linear.y, msg->twist.angular.z);
 
-        ROS_INFO("Current msg: v_x: %f, v_y: %f, a_z: %f", msg->linear.x, msg->linear.y, msg->angular.z);
-
-        // std::vector<uint8_t> data = ma_serial_packet::toVector(packet);
-        
         uint8_t* packet_ptr = reinterpret_cast<uint8_t*>(&packet);
-
-        
 
         ser.write(packet_ptr, sizeof(packet));
         
-
     }catch(const std::exception& ex){
         ROS_INFO("Error when sending data: %s", ex.what());
-        // Reopen port here
     }
-
 }
+
 
 int main(int argc, char** argv) {
 
@@ -81,11 +74,12 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    ros::Publisher pub = nh.advertise<std_msgs::UInt16>("ma_vel", 50);
-    ros::Subscriber sub = nh.subscribe("/cmd_vel", 1000, cmd_velCallBack);
+    ros::Publisher pub = nh.advertise<std_msgs::UInt16>("/ma_vel", 50);
+    ros::Subscriber sub = nh.subscribe("/msg_pub/cmd_vel", 1000, cmd_velCallBack);
     tf::TransformBroadcaster tf_broadcaster;
 
-    ros::spin();
+    while(ros::ok())
+        ros::spinOnce();
 
     return 0;
 }

@@ -330,6 +330,7 @@ int main(int argc, char** argv)
       if (safetyStop >= 2) vehicleYawRate = 0;
 
       pubSkipCount--;
+      // ROS_INFO("Current pub skit count is: %d", pubSkipCount);
       if (pubSkipCount < 0) {
         cmd_vel.header.stamp = ros::Time().fromSec(odomTime);
         if (fabs(vehicleSpeed) <= maxAccel / 100.0) cmd_vel.twist.linear.x = 0;
