@@ -8,6 +8,7 @@ sudo apt update
 sudo apt install libusb-dev
 sudo apt install ros-noetic-serial
 sudo apt install ros-noetic-tf2-sensor-msgs
+sudo apt install ros-noetic-velodyne-gazebo-plugins
 ```
 
 Then get into vehicile_simulator file folder
