@@ -82,7 +82,7 @@
     <param name="autonomyMode" value="$(arg autonomyMode)" />
     <param name="autonomySpeed" value="$(arg autonomySpeed)" />
     <param name="joyToSpeedDelay" value="$(arg joyToSpeedDelay)" />
-    <remap from="/cmd_vel" to="/msg_pub/cmd_vel" />
+    <!-- <remap from="/cmd_vel" to="/msg_pub/cmd_vel" /> -->
   </node>
 
   <node pkg="tf" type="static_transform_publisher" name="vehicleTransPublisher" args="-$(arg sensorOffsetX) -$(arg sensorOffsetY) 0 0 0 0 /sensor /vehicle 1000"/>
