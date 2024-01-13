@@ -53,6 +53,7 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& odom)
 
     pitch = -pitch;
     yaw = -yaw;
+    // roll = roll + PI;
 
     geoQuat = tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
 
@@ -92,9 +93,12 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudIn)
     int laserCloudSize = laserCloud->points.size();
     for (int i = 0; i < laserCloudSize; i++) {
       float temp = laserCloud->points[i].x;
-      laserCloud->points[i].x = laserCloud->points[i].z;
-      laserCloud->points[i].z = laserCloud->points[i].y;
-      laserCloud->points[i].y = temp;
+      // laserCloud->points[i].x = laserCloud->points[i].z;
+      // laserCloud->points[i].z = laserCloud->points[i].y;
+      // laserCloud->points[i].y = temp;
+      laserCloud->points[i].x = laserCloud->points[i].x;
+      laserCloud->points[i].y = laserCloud->points[i].y;
+      laserCloud->points[i].z = -laserCloud->points[i].z;
     }
   }
 

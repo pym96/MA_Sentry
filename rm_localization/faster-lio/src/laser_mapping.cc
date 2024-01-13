@@ -700,6 +700,11 @@ void LaserMapping::PublishOdometry(const ros::Publisher &pub_odom_aft_mapped) {
     q.setX(odom_aft_mapped_.pose.pose.orientation.x);
     q.setY(odom_aft_mapped_.pose.pose.orientation.y);
     q.setZ(odom_aft_mapped_.pose.pose.orientation.z);
+    // Quaternion representing a 180-degree rotation around the Y-axis
+    tf::Quaternion q_rotation;
+    q_rotation.setRPY(0, M_PI, 0); // Roll, Pitch, Yaw (in radians)
+    // Apply the rotation to the current orientation
+    tf::Quaternion q_new = q_rotation * q;
     transform.setRotation(q);
     br.sendTransform(tf::StampedTransform(transform, odom_aft_mapped_.header.stamp, tf_world_frame_, tf_imu_frame_));
 }
