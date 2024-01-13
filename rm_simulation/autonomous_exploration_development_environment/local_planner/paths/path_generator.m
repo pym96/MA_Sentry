@@ -111,7 +111,7 @@ pause(1.0);
 %% find correspondence
 %{.
 voxelSize = 0.02;
-searchRadius = 0.45;
+searchRadius = 0.7;
 offsetX = 3.2;
 offsetY = 4.5;
 voxelNumX = 161;

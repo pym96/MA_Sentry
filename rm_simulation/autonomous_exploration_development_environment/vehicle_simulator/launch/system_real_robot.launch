@@ -1,23 +1,33 @@
 <launch>
 
+  <arg name="vehicleHeight" default="0.75"/>
   <arg name="cameraOffsetZ" default="0"/>
   <arg name="vehicleX" default="0"/>
   <arg name="vehicleY" default="0"/>
-  <arg name="checkTerrainConn" default="false"/>
+  <arg name="terrainZ" default="0.0"/>
+  <arg name="vehicleYaw" default="0"/>
+  <arg name="gazebo_gui" default="true"/>
+  <arg name="checkTerrainConn" default="true"/>
+  <arg name="maxSpeed" default="0.8"/>
+  <arg name="autonomySpeed" default="2.0"/>
 
-  <include file="$(find ps3joy)/launch/ps3.launch" />
 
   <include file="$(find local_planner)/launch/local_planner.launch" >
     <arg name="cameraOffsetZ" value="$(arg cameraOffsetZ)"/>
     <arg name="goalX" value="$(arg vehicleX)"/>
     <arg name="goalY" value="$(arg vehicleY)"/>
+    <arg name="maxSpeed" value="$(arg maxSpeed)"/>
+    <arg name="autonomySpeed" value="$(arg autonomySpeed)"/>
   </include>
 
-  <include file="$(find terrain_analysis)/launch/terrain_analysis.launch" />
 
+  <!-- 启动地形分析，主要用于避障 -->
+  <include file="$(find terrain_analysis)/launch/terrain_analysis.launch" />
+  <!-- 启动地形分析的extension，同时此地图分析面积更大，频率更低，主要用来生成高质量的全局规划 -->
   <include file="$(find terrain_analysis_ext)/launch/terrain_analysis_ext.launch" >
     <arg name="checkTerrainConn" value="$(arg checkTerrainConn)"/>
   </include>
+
 
   <include file="$(find sensor_scan_generation)/launch/sensor_scan_generation.launch" />
 
