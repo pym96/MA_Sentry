@@ -26,6 +26,8 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/kdtree/kdtree_flann.h>
 
+#include <Eigen/Dense>
+
 using namespace std;
 
 const double PI = 3.1415926;
@@ -59,6 +61,7 @@ bool noRotAtGoal = true;
 bool autonomyMode = false;
 double autonomySpeed = 1.0;
 double joyToSpeedDelay = 2.0;
+double currAngle = 0.0;
 
 float joySpeed = 0;
 float joySpeedRaw = 0;
@@ -91,6 +94,9 @@ bool pathInit = false;
 bool navFwd = true;
 double switchTime = 0;
 
+// Calculate the rotation matrix
+Eigen::Matrix2d rotationMatrix;
+
 nav_msgs::Path path;
 
 void odomHandler(const nav_msgs::Odometry::ConstPtr& odomIn)
@@ -108,6 +114,7 @@ void odomHandler(const nav_msgs::Odometry::ConstPtr& odomIn)
   vehicleY = odomIn->pose.pose.position.y - sin(yaw) * sensorOffsetX - cos(yaw) * sensorOffsetY;
   vehicleZ = odomIn->pose.pose.position.z;
 
+  //rad, too steep to move
   if ((fabs(roll) > inclThre * PI / 180.0 || fabs(pitch) > inclThre * PI / 180.0) && useInclToStop) {
     stopInitTime = odomIn->header.stamp.toSec();
   }
@@ -261,11 +268,22 @@ int main(int argc, char** argv)
           break;
         }
       }
-
+      
+      // Get current segmented point, x and y
       disX = path.poses[pathPointID].pose.position.x - vehicleXRel;
       disY = path.poses[pathPointID].pose.position.y - vehicleYRel;
+
       dis = sqrt(disX * disX + disY * disY);
+      
+      // Get segmented moving direction
       float pathDir = atan2(disY, disX);
+
+      // Set rotation matrix
+      // TODO: give it to velocity
+      rotationMatrix << cos(pathDir), -sin(pathDir),
+                        sin(pathDir), cos(pathDir);
+
+      // TODO: publish velocity directly, using rotation matrix
 
       float dirDiff = vehicleYaw - vehicleYawRec - pathDir;
       if (dirDiff > PI) dirDiff -= 2 * PI;
@@ -285,6 +303,8 @@ int main(int argc, char** argv)
       }
 
       float joySpeed2 = maxSpeed * joySpeed;
+
+      // TODO: Do something here
       if (!navFwd) {
         dirDiff += PI;
         if (dirDiff > PI) dirDiff -= 2 * PI;
@@ -335,6 +355,7 @@ int main(int argc, char** argv)
         cmd_vel.header.stamp = ros::Time().fromSec(odomTime);
         if (fabs(vehicleSpeed) <= maxAccel / 100.0) cmd_vel.twist.linear.x = 0;
         else cmd_vel.twist.linear.x = vehicleSpeed;
+        
         cmd_vel.twist.angular.z = vehicleYawRate;
         pubSpeed.publish(cmd_vel);
 
