@@ -19,6 +19,7 @@
 
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
@@ -95,9 +96,13 @@ bool navFwd = true;
 double switchTime = 0;
 
 // Calculate the rotation matrix
-Eigen::Matrix2d rotationMatrix;
+Eigen::Matrix2d goal2map;
+Eigen::Matrix2d map2odom_rotation;
+Eigen::Matrix2d goal2odom;
+tf::StampedTransform map2odom;
 
 nav_msgs::Path path;
+tf::TransformListener listener;
 
 void odomHandler(const nav_msgs::Odometry::ConstPtr& odomIn)
 {
@@ -280,8 +285,26 @@ int main(int argc, char** argv)
 
       // Set rotation matrix
       // TODO: give it to velocity
-      rotationMatrix << cos(pathDir), -sin(pathDir),
-                        sin(pathDir), cos(pathDir);
+      goal2map << cos(pathDir), -sin(pathDir),
+                  sin(pathDir), cos(pathDir);
+
+
+      // Lookup the transform between link_map and link_odom
+      listener.lookupTransform("map",ros::Time::now(), "odom",ros::Time::now(), "map", map2odom);
+            
+      // Extract the rotation matrix
+      tf::Matrix3x3 rotation_matrix(map2odom.getRotation());
+            
+      // Print the rotation matrix
+      tf::Vector3 row1 = rotation_matrix.getRow(0);
+      tf::Vector3 row2 = rotation_matrix.getRow(1);
+      ROS_INFO("Rotation Matrix:");
+      ROS_INFO("%.2f %.2f", row1.x(), row1.y());
+      ROS_INFO("%.2f %.2f", row2.x(), row2.y());
+      map2odom_rotation << row1.x(), row1.y(),
+                          row2.x(); row2.y();
+
+      goal2odom = goal2map * map2odom_rotation;
 
       // TODO: publish velocity directly, using rotation matrix
 
@@ -356,7 +379,11 @@ int main(int argc, char** argv)
         if (fabs(vehicleSpeed) <= maxAccel / 100.0) cmd_vel.twist.linear.x = 0;
         else cmd_vel.twist.linear.x = vehicleSpeed;
         
-        cmd_vel.twist.angular.z = vehicleYawRate;
+        cmd_vel.twist.linear.x = vehicleSpeed * goal2odom(0, 0);
+        cmd_vel.twist.linear.y = vehicleSpeed * goal2odom(1, 0);      
+        
+        // cmd_vel.twist.angular.z = vehicleYawRate;
+
         pubSpeed.publish(cmd_vel);
 
         pubSkipCount = pubSkipNum;
