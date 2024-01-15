@@ -99,6 +99,7 @@ double switchTime = 0;
 Eigen::Matrix2d goal2map;
 Eigen::Matrix2d map2odom_rotation;
 Eigen::Matrix2d goal2odom;
+Eigen::Matrix2d odom2goal;
 tf::StampedTransform map2odom;
 
 nav_msgs::Path path;
@@ -298,9 +299,6 @@ int main(int argc, char** argv)
       // Print the rotation matrix
       tf::Vector3 row1 = rotation_matrix.getRow(0);
       tf::Vector3 row2 = rotation_matrix.getRow(1);
-      ROS_INFO("Rotation Matrix:");
-      ROS_INFO("%.2f %.2f", row1.x(), row1.y());
-      ROS_INFO("%.2f %.2f", row2.x(), row2.y());
       map2odom_rotation << row1.x(), row1.y(),
                           row2.x(); row2.y();
 
@@ -378,9 +376,11 @@ int main(int argc, char** argv)
         cmd_vel.header.stamp = ros::Time().fromSec(odomTime);
         if (fabs(vehicleSpeed) <= maxAccel / 100.0) cmd_vel.twist.linear.x = 0;
         else cmd_vel.twist.linear.x = vehicleSpeed;
+
+        odom2goal = goal2map.transpose();
         
-        cmd_vel.twist.linear.x = vehicleSpeed * goal2odom(0, 0);
-        cmd_vel.twist.linear.y = vehicleSpeed * goal2odom(1, 0);      
+        cmd_vel.twist.linear.x = vehicleSpeed * odom2goal(0, 0);
+        cmd_vel.twist.linear.y = vehicleSpeed * odom2goal(1, 0);      
         
         // cmd_vel.twist.angular.z = vehicleYawRate;
 
