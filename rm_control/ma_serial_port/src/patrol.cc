@@ -3,8 +3,6 @@
 #include <math.h>
 #include <chrono>
 
-
-
 int main(int argc, char** argv) {
 
     ros::init(argc, argv, "ma_sentry_patrol");  // Initialize ROS
@@ -47,8 +45,10 @@ int main(int argc, char** argv) {
             }
         }
 
-        msg.twist.linear.x = y_speed;
+        msg.twist.linear.y = y_speed;
         msg.twist.angular.z = angular_speed;
+        
+        vel_pub.publish(msg);
 
         ros::spinOnce();
         loop_rate.sleep();

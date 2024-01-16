@@ -98,6 +98,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/ma_serial.cc src/crc.cc)
 add_executable(${PROJECT_NAME}_stop src/stop_moving.cc)
+add_executable(${PROJECT_NAME}_patrol src/patrol.cc)
 
 
 ## Add cmake target dependencies of the executable
@@ -113,6 +114,11 @@ target_link_libraries(${PROJECT_NAME}_node
 target_link_libraries(${PROJECT_NAME}_stop
   ${catkin_LIBRARIES}
   ${serial_LIBRARIES}  
+)
+
+target_link_libraries(${PROJECT_NAME}_patrol
+  ${catkin_LIBRARIES}
+  ${serial_LIBRARIES}
 )
 
 #############

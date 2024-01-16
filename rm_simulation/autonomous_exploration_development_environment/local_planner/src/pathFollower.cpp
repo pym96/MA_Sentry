@@ -379,8 +379,8 @@ int main(int argc, char** argv)
 
         odom2goal = goal2map.transpose();
         
-        cmd_vel.twist.linear.x = vehicleSpeed * odom2goal(0, 0);
-        cmd_vel.twist.linear.y = vehicleSpeed * odom2goal(1, 0);      
+        cmd_vel.twist.linear.x = vehicleSpeed * goal2odom(0, 0);
+        cmd_vel.twist.linear.y = vehicleSpeed * goal2odom(1, 0);      
         
         // cmd_vel.twist.angular.z = vehicleYawRate;
 
