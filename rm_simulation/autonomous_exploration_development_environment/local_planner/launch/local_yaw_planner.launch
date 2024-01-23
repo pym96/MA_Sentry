@@ -53,20 +53,20 @@
     <param name="goalY" type="double" value="$(arg goalY)" />
   </node>
 
-  <node pkg="local_planner" type="pathFollower" name="pathFollower" output="screen" required="true">
+   <node pkg="local_planner" type="pathFollowerYaw" name="pathFollower" output="screen" required="true">
     <param name="sensorOffsetX" value="$(arg sensorOffsetX)" />
     <param name="sensorOffsetY" value="$(arg sensorOffsetY)" />
     <param name="pubSkipNum" type="int" value="1" />
     <param name="twoWayDrive" value="$(arg twoWayDrive)" />
-    <param name="lookAheadDis" type="double" value="0.3" />
-    <param name="yawRateGain" type="double" value="9.5" />
-    <param name="stopYawRateGain" type="double" value="18.0" />
-    <param name="maxYawRate" type="double" value="20.0" />
+    <param name="lookAheadDis" type="double" value="0.5" />
+    <param name="yawRateGain" type="double" value="7.5" />
+    <param name="stopYawRateGain" type="double" value="7.5" />
+    <param name="maxYawRate" type="double" value="90.0" />
     <param name="maxSpeed" value="$(arg maxSpeed)" />
     <param name="maxAccel" type="double" value="2.5" />
     <param name="switchTimeThre" type="double" value="1.0" />
-    <param name="dirDiffThre" type="double" value="0.3" />
-    <param name="stopDisThre" type="double" value="0.15" />
+    <param name="dirDiffThre" type="double" value="0.1" />
+    <param name="stopDisThre" type="double" value="0.2" />
     <param name="slowDwnDisThre" type="double" value="0.85" />
     <param name="useInclRateToSlow" type="bool" value="false" />
     <param name="inclRateThre" type="double" value="120.0" />
@@ -82,8 +82,9 @@
     <param name="autonomyMode" value="$(arg autonomyMode)" />
     <param name="autonomySpeed" value="$(arg autonomySpeed)" />
     <param name="joyToSpeedDelay" value="$(arg joyToSpeedDelay)" />
-    <!-- <remap from="/cmd_vel" to="/msg_pub/cmd_vel" /> -->
+    <!-- <remap from="/cmd_vel" to="/A/car0/cmd_vel" /> -->
   </node>
+
 
   <node pkg="tf" type="static_transform_publisher" name="vehicleTransPublisher" args="-$(arg sensorOffsetX) -$(arg sensorOffsetY) 0 0 0 0 /sensor /vehicle 1000"/>
 

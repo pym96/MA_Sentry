@@ -52,12 +52,15 @@ link_directories(
 ## Declare executables
 add_executable(localPlanner src/localPlanner.cpp)
 add_executable(pathFollower src/pathFollower.cpp)
+add_executable(pathFollowerYaw src/pathFollowerYaw.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(localPlanner ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 target_link_libraries(pathFollower ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pathFollowerYaw ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
-install(TARGETS localPlanner pathFollower
+
+install(TARGETS localPlanner pathFollower pathFollowerYaw
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

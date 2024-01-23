@@ -13,10 +13,10 @@
     <arg name="yaw_pos" default="0" />
 
     <!-- Automomous exploration Development Enviroment -->
-    <arg name="world_name" defalut="2023_v_4_1" />
-    <arg name="checkTerrainConn" defalut="true" />
-    <arg name="maxSpeed" defalut="2" />
-    <arg name="autonomySpeed" defalut="2" />
+    <arg name="world_name" default="2023_v_4_1" />
+    <arg name="checkTerrainConn" default="true" />
+    <arg name="maxSpeed" default="2" />
+    <arg name="autonomySpeed" default="2" />
     
     <!-- Launch Gazebo and robot -->
     <include file="$(find ma_simulation)/launch/gazebo_rmuc.launch" >

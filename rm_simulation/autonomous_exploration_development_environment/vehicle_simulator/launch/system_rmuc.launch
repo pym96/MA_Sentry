@@ -15,7 +15,7 @@
   <include file="$(find ps3joy)/launch/ps3.launch" /> -->
 
   <!-- 启动local_planner，并发布初始目标，此处和下方的地图中的初始目标一致 -->
-  <include file="$(find local_planner)/launch/local_planner.launch" >
+  <include file="$(find local_planner)/launch/local_yaw_planner.launch" >
     <arg name="cameraOffsetZ" value="$(arg cameraOffsetZ)"/>
     <arg name="goalX" value="$(arg vehicleX)"/>
     <arg name="goalY" value="$(arg vehicleY)"/>
