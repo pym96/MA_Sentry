@@ -120,7 +120,7 @@ int main(int argc, char * argv[])
 ```
 
 
-Path follower
+## Update Path follower
 ```
 #include <math.h>
 #include <time.h>
