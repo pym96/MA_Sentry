@@ -1,3 +1,4 @@
+```
 int main(int argc, char **argv) {
     ros::init(argc, argv, "odom_to_goal_rotation");
     ros::NodeHandle nh;
@@ -27,3 +28,93 @@ int main(int argc, char **argv) {
 
     // 计算从odom到目标点的方向向量
     Eigen::Vector3d direction_to_goal(goal_x -
+```
+
+```
+#include <rclcpp/rclcpp.hpp>
+#include <geometry_msgs/msg/twist.hpp>
+#include <std_msgs/msg/float64_multi_array.hpp>
+#include <cmath>
+#include <array>
+#include <memory>
+
+using std::placeholders::_1;
+using namespace std::chrono_literals;
+
+std::array<double, 3> axes{0.0, 0.0, 0.0};
+
+class Commander : public rclcpp::Node
+{
+public:
+    Commander()
+    : Node("commander"), L(0.125), Rw(0.03)
+    {
+        publisher_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("/forward_velocity_controller/commands", 10);
+        timer_ = this->create_wall_timer(5ms, std::bind(&Commander::timer_callback, this));
+    }
+
+private:
+    void timer_callback()
+    {
+        std::array<double, 4> wheel_vel;
+
+        double vel_x = axes[0];
+        double vel_y = axes[1];
+        double vel_w = axes[2];
+
+        // Compute wheel velocities
+        wheel_vel[0] = (vel_x * std::sin(M_PI / 4) + vel_y * std::cos(M_PI / 4) + L * vel_w) / Rw;
+        wheel_vel[1] = (vel_x * std::sin(M_PI / 4 + M_PI / 2) + vel_y * std::cos(M_PI / 4 + M_PI / 2) + L * vel_w) / Rw;
+        wheel_vel[2] = (vel_x * std::sin(M_PI / 4 - M_PI) + vel_y * std::cos(M_PI / 4 - M_PI) + L * vel_w) / Rw;
+        wheel_vel[3] = (vel_x * std::sin(M_PI / 4 - M_PI / 2) + vel_y * std::cos(M_PI / 4 - M_PI / 2) + L * vel_w) / Rw;
+
+        // Publish wheel velocities
+        auto message = std_msgs::msg::Float64MultiArray();
+        message.data = {wheel_vel.begin(), wheel_vel.end()};
+        publisher_->publish(message);
+    }
+
+    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr publisher_;
+    rclcpp::TimerBase::SharedPtr timer_;
+    double L;
+    double Rw;
+};
+
+class JoySubscriber : public rclcpp::Node
+{
+public:
+    JoySubscriber()
+    : Node("cmd_vel_subscriber")
+    {
+        subscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
+            "cmd_vel_nav", 10, std::bind(&JoySubscriber::listener_callback, this, _1));
+    }
+
+private:
+    void listener_callback(const geometry_msgs::msg::Twist::SharedPtr msg)
+    {
+        axes[0] = -msg->linear.y;
+        axes[1] = -msg->linear.x;
+        axes[2] = -msg->angular.z;
+    }
+
+    rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription_;
+};
+
+int main(int argc, char * argv[])
+{
+    rclcpp::init(argc, argv);
+
+    auto commander = std::make_shared<Commander>();
+    auto joy_subscriber = std::make_shared<JoySubscriber>();
+
+    rclcpp::executors::MultiThreadedExecutor executor;
+    executor.add_node(commander);
+    executor.add_node(joy_subscriber);
+
+    executor.spin();
+
+    rclcpp::shutdown();
+    return 0;
+}
+```
