@@ -12,7 +12,6 @@
 #include <std_msgs/Float32.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
-#include <geometry_msgs/Point.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -20,15 +19,12 @@
 
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
-#include <tf/transform_listener.h>
 
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/kdtree/kdtree_flann.h>
-
-#include <Eigen/Dense>
 
 using namespace std;
 
@@ -46,7 +42,7 @@ double maxYawRate = 45.0;
 double maxSpeed = 1.0;
 double maxAccel = 1.0;
 double switchTimeThre = 1.0;
-double dirDiffThre = 0.1;
+//double dirDiffThre = 0.1;
 double stopDisThre = 0.2;
 double slowDwnDisThre = 1.0;
 bool useInclRateToSlow = false;
@@ -58,18 +54,16 @@ double slowTime2 = 2.0;
 bool useInclToStop = false;
 double inclThre = 45.0;
 double stopTime = 5.0;
-bool noRotAtStop = false;
-bool noRotAtGoal = true;
+//bool noRotAtStop = false;
+//bool noRotAtGoal = true;
 bool autonomyMode = false;
 double autonomySpeed = 1.0;
 double joyToSpeedDelay = 2.0;
-double currAngle = 0.0;
-double vel_x = 0.0;
-double vel_y = 0.0;
 
 float joySpeed = 0;
 float joySpeedRaw = 0;
 float joyYaw = 0;
+float desiredYaw = 0;
 int safetyStop = 0;
 
 float vehicleX = 0;
@@ -90,33 +84,16 @@ float vehicleYawRate = 0;
 float vehicleSpeed = 0;
 
 double odomTime = 0;
+bool odomInit = false;
 double joyTime = 0;
 double slowInitTime = 0;
 double stopInitTime = false;
 int pathPointID = 0;
 bool pathInit = false;
 bool navFwd = true;
-bool isReach = false;
 double switchTime = 0;
-double goalPointX = 0.0;
-double goalPointY = 0.0;
-
-
-// Calculate the rotation matrix
-Eigen::Matrix2d goal2map;
-Eigen::Matrix2d map2odom_rotation;
-Eigen::Matrix2d goal2odom;
-Eigen::Matrix2cd odom2goal;
-tf::StampedTransform map2odom;
 
 nav_msgs::Path path;
-geometry_msgs::Point goal_point;  // Declare goal_point globally
-
-bool hasReached(double x, double y, const geometry_msgs::Point& goal) {
-    double distance = pow(x - goal.x, 2) + pow(y - goal.y, 2);
-    if (distance <= stopDisThre) return true;
-    return false;
-}
 
 void odomHandler(const nav_msgs::Odometry::ConstPtr& odomIn)
 {
@@ -131,16 +108,19 @@ void odomHandler(const nav_msgs::Odometry::ConstPtr& odomIn)
   vehicleYaw = yaw;
   vehicleX = odomIn->pose.pose.position.x - cos(yaw) * sensorOffsetX + sin(yaw) * sensorOffsetY;
   vehicleY = odomIn->pose.pose.position.y - sin(yaw) * sensorOffsetX - cos(yaw) * sensorOffsetY;
-  vehicleY = -vehicleY;
   vehicleZ = odomIn->pose.pose.position.z;
 
-  //rad, too steep to move
   if ((fabs(roll) > inclThre * PI / 180.0 || fabs(pitch) > inclThre * PI / 180.0) && useInclToStop) {
     stopInitTime = odomIn->header.stamp.toSec();
   }
 
   if ((fabs(odomIn->twist.twist.angular.x) > inclRateThre * PI / 180.0 || fabs(odomIn->twist.twist.angular.y) > inclRateThre * PI / 180.0) && useInclRateToSlow) {
     slowInitTime = odomIn->header.stamp.toSec();
+  }
+  
+  if (!odomInit) {
+    desiredYaw = yaw;
+    odomInit = true;
   }
 }
 
@@ -172,14 +152,16 @@ void joystickHandler(const sensor_msgs::Joy::ConstPtr& joy)
   joySpeedRaw = sqrt(joy->axes[3] * joy->axes[3] + joy->axes[4] * joy->axes[4]);
   joySpeed = joySpeedRaw;
   if (joySpeed > 1.0) joySpeed = 1.0;
-  if (joy->axes[4] == 0) joySpeed = 0;
-  joyYaw = joy->axes[3];
-  if (joySpeed == 0 && noRotAtStop) joyYaw = 0;
+  //if (joy->axes[4] == 0) joySpeed = 0;
+  //joyYaw = joy->axes[3];
+  //if (joySpeed == 0 && noRotAtStop) joyYaw = 0;
 
-  if (joy->axes[4] < 0 && !twoWayDrive) {
+  /*if (joy->axes[4] < 0 && !twoWayDrive) {
     joySpeed = 0;
     joyYaw = 0;
-  }
+  }*/
+
+  joyYaw = joy->axes[0];
 
   if (joy->axes[2] > -0.1) {
     autonomyMode = false;
@@ -205,11 +187,6 @@ void stopHandler(const std_msgs::Int8::ConstPtr& stop)
   safetyStop = stop->data;
 }
 
-
-void navHandler(const geometry_msgs::Point::ConstPtr& msg){
-    goal_point = *msg;
-}
-
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "pathFollower");
@@ -227,7 +204,7 @@ int main(int argc, char** argv)
   nhPrivate.getParam("maxSpeed", maxSpeed);
   nhPrivate.getParam("maxAccel", maxAccel);
   nhPrivate.getParam("switchTimeThre", switchTimeThre);
-  nhPrivate.getParam("dirDiffThre", dirDiffThre);
+  //nhPrivate.getParam("dirDiffThre", dirDiffThre);
   nhPrivate.getParam("stopDisThre", stopDisThre);
   nhPrivate.getParam("slowDwnDisThre", slowDwnDisThre);
   nhPrivate.getParam("useInclRateToSlow", useInclRateToSlow);
@@ -239,8 +216,8 @@ int main(int argc, char** argv)
   nhPrivate.getParam("useInclToStop", useInclToStop);
   nhPrivate.getParam("inclThre", inclThre);
   nhPrivate.getParam("stopTime", stopTime);
-  nhPrivate.getParam("noRotAtStop", noRotAtStop);
-  nhPrivate.getParam("noRotAtGoal", noRotAtGoal);
+  //nhPrivate.getParam("noRotAtStop", noRotAtStop);
+  //nhPrivate.getParam("noRotAtGoal", noRotAtGoal);
   nhPrivate.getParam("autonomyMode", autonomyMode);
   nhPrivate.getParam("autonomySpeed", autonomySpeed);
   nhPrivate.getParam("joyToSpeedDelay", joyToSpeedDelay);
@@ -255,12 +232,8 @@ int main(int argc, char** argv)
 
   ros::Subscriber subStop = nh.subscribe<std_msgs::Int8> ("/stop", 5, stopHandler);
 
-  ros::Subscriber goalPoint = nh.subscribe<geometry_msgs::Point>("/way_point", 5, navHandler);
-
   ros::Publisher pubSpeed = nh.advertise<geometry_msgs::TwistStamped> ("/cmd_vel", 5);
   geometry_msgs::TwistStamped cmd_vel;
-
-  tf::TransformListener listener(ros::Duration(60)); // Increase the buffer size if needed
   cmd_vel.header.frame_id = "vehicle";
 
   if (autonomyMode) {
@@ -286,16 +259,6 @@ int main(int argc, char** argv)
       float endDisY = path.poses[pathSize - 1].pose.position.y - vehicleYRel;
       float endDis = sqrt(endDisX * endDisX + endDisY * endDisY);
 
-      isReach = hasReached(vehicleXRel, vehicleYRel, goal_point);
-
-      // if (isReach) {
-      //     cmd_vel.twist.linear.x = 0;
-      //     cmd_vel.twist.linear.y = 0;
-      //     pubSpeed.publish(cmd_vel); 
-      //     pathInit = false;
-      //     continue;
-      // }
-
       float disX, disY, dis;
       while (pathPointID < pathSize - 1) {
         disX = path.poses[pathPointID].pose.position.x - vehicleXRel;
@@ -308,69 +271,10 @@ int main(int argc, char** argv)
         }
       }
 
-      // Get segmented moving direction
+      disX = path.poses[pathPointID].pose.position.x - vehicleXRel;
+      disY = path.poses[pathPointID].pose.position.y - vehicleYRel;
+      dis = sqrt(disX * disX + disY * disY);
       float pathDir = atan2(disY, disX);
-
-      // Set rotation matrix
-      // TODO: give it to velocity
-      // goal2map << cos(pathDir), -sin(pathDir),
-      //             sin(pathDir), cos(pathDir);
-
-
-    try {
-        // The code where you perform the transform lookup causing the exception
-        listener.lookupTransform("map", "vehicle", ros::Time(odomTime), map2odom);
-        
-      } catch (tf::TransformException& ex) {
-        // Handle the exception
-        ROS_ERROR("Transform lookup failed: %s", ex.what());
-      }
-
-
-      #if 1
-
-        // tf::Quaternion q = map2odom.getRotation();
-
-        // Eigen::Quaterniond quaternion(q.w(), q.x(), q.y(), q.z());
-        // Eigen::Matrix3d roatation_matrix = quaternion.toRotationMatrix();
-
-        // Dir vector
-        Eigen::Vector3d direction_to_goal(disX, disY, 0);
-
-        // Normalize goal dir vector
-        Eigen::Vector3d unit_direction_to_goal = direction_to_goal.normalized();
-
-        double angle = atan2(unit_direction_to_goal.y(), unit_direction_to_goal.x());
-
-        // 计算当前机器人朝向（基于vehicleYaw）
-        Eigen::Vector3d current_direction(cos(vehicleYaw), sin(vehicleYaw), 0);
-
-            // 计算朝向与目标方向之间的角度差
-        double angle_diff = atan2(current_direction.y(), current_direction.x()) 
-                         - atan2(unit_direction_to_goal.y(), unit_direction_to_goal.x());
-
-        Eigen::Matrix3d nor_rotation_matrix;
-        nor_rotation_matrix = Eigen::AngleAxisd(angle_diff, Eigen::Vector3d::UnitZ());
-
-      #endif
-
-
-      // Extract the rotation matrix
-      tf::Matrix3x3 rotation_matrix = map2odom.getBasis();
-
-      double roll, pitch, yaw;
-      
-      rotation_matrix.getRPY(roll, pitch, yaw);
-
-      yaw = yaw * M_PI / 180.0;
-            
-
-      map2odom_rotation << cos(yaw), -sin(yaw),
-                           sin(yaw), cos(yaw); 
-
-      goal2odom = goal2map * map2odom_rotation;
-
-      // TODO: publish velocity directly, using rotation matrix
 
       float dirDiff = vehicleYaw - vehicleYawRec - pathDir;
       if (dirDiff > PI) dirDiff -= 2 * PI;
@@ -378,24 +282,42 @@ int main(int argc, char** argv)
       if (dirDiff > PI) dirDiff -= 2 * PI;
       else if (dirDiff < -PI) dirDiff += 2 * PI;
 
+      desiredYaw += 0.01 * joyYaw;
+      if (desiredYaw > PI) desiredYaw -= 2 * PI;
+      else if (desiredYaw < -PI) desiredYaw += 2 * PI;
+
+      float yawDiff = vehicleYaw - desiredYaw;
+      if (yawDiff > PI) yawDiff -= 2 * PI;
+      else if (yawDiff < -PI) yawDiff += 2 * PI;
+
       if (twoWayDrive) {
         double time = ros::Time::now().toSec();
-        if (fabs(dirDiff) > PI / 2 && navFwd && time - switchTime > switchTimeThre) {
+        if (fabs(yawDiff) > PI / 2 && navFwd && time - switchTime > switchTimeThre) {
           navFwd = false;
           switchTime = time;
-        } else if (fabs(dirDiff) < PI / 2 && !navFwd && time - switchTime > switchTimeThre) {
+        } else if (fabs(yawDiff) < PI / 2 && !navFwd && time - switchTime > switchTimeThre) {
           navFwd = true;
           switchTime = time;
         }
       }
 
       float joySpeed2 = maxSpeed * joySpeed;
-
-
-      if (pathSize <= 1 || (dis < stopDisThre && noRotAtGoal)) {
-        // Rotating
-        vehicleYawRate = 0;
+      if (!navFwd) {
+        yawDiff += PI;
+        if (yawDiff > PI) yawDiff -= 2 * PI;
       }
+
+      if (fabs(vehicleSpeed) < 2.0 * maxAccel / 100.0) vehicleYawRate = -stopYawRateGain * yawDiff;
+      else vehicleYawRate = -yawRateGain * yawDiff;
+
+      if (vehicleYawRate > maxYawRate * PI / 180.0) vehicleYawRate = maxYawRate * PI / 180.0;
+      else if (vehicleYawRate < -maxYawRate * PI / 180.0) vehicleYawRate = -maxYawRate * PI / 180.0;
+
+      /*if (joySpeed2 == 0 && !autonomyMode) {
+        vehicleYawRate = maxYawRate * joyYaw * PI / 180.0;
+      } else if (pathSize <= 1 || (dis < stopDisThre && noRotAtGoal)) {
+        vehicleYawRate = 0;
+      }*/
 
       if (pathSize <= 1) {
         joySpeed2 = 0;
@@ -407,30 +329,33 @@ int main(int argc, char** argv)
       if (odomTime < slowInitTime + slowTime1 && slowInitTime > 0) joySpeed3 *= slowRate1;
       else if (odomTime < slowInitTime + slowTime1 + slowTime2 && slowInitTime > 0) joySpeed3 *= slowRate2;
 
+      if (dis > stopDisThre) {
+        if (vehicleSpeed < joySpeed3) vehicleSpeed += maxAccel / 100.0;
+        else if (vehicleSpeed > joySpeed3) vehicleSpeed -= maxAccel / 100.0;
+      } else {
+        if (vehicleSpeed > 0) vehicleSpeed -= maxAccel / 100.0;
+        else if (vehicleSpeed < 0) vehicleSpeed += maxAccel / 100.0;
+      }
 
-      if (fabs(vehicleSpeed) < maxSpeed) vehicleSpeed += maxAccel / 100.0;
-      else vehicleSpeed = vehicleSpeed;  
-
-      
       if (odomTime < stopInitTime + stopTime && stopInitTime > 0) {
         vehicleSpeed = 0;
         vehicleYawRate = 0;
       }
 
+      if (safetyStop >= 1) vehicleSpeed = 0;
+      if (safetyStop >= 2) vehicleYawRate = 0;
+
       pubSkipCount--;
-      // ROS_INFO("Current pub skit count is: %d", pubSkipCount);
       if (pubSkipCount < 0) {
-        cmd_vel.header.stamp = ros::Time(odomTime);
-
-        odom2goal = goal2odom.transpose();
-
-        Eigen::Vector3d vel(vehicleSpeed, 0, 0);
-
-        Eigen::Vector3d rotated_velocity = nor_rotation_matrix * vel;
-
-        cmd_vel.twist.linear.x = rotated_velocity.x();
-        cmd_vel.twist.linear.y = rotated_velocity.y();    
-
+        cmd_vel.header.stamp = ros::Time().fromSec(odomTime);
+        if (fabs(vehicleSpeed) <= maxAccel / 100.0) {
+          cmd_vel.twist.linear.x = 0;
+          cmd_vel.twist.linear.y = 0;
+        } else {
+          cmd_vel.twist.linear.x = cos(dirDiff) * vehicleSpeed;
+          cmd_vel.twist.linear.y = -sin(dirDiff) * vehicleSpeed;
+        }
+        cmd_vel.twist.angular.z = vehicleYawRate;
         pubSpeed.publish(cmd_vel);
 
         pubSkipCount = pubSkipNum;

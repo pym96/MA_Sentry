@@ -213,14 +213,14 @@ void joystickHandler(const sensor_msgs::Joy::ConstPtr& joy)
   joySpeedRaw = sqrt(joy->axes[3] * joy->axes[3] + joy->axes[4] * joy->axes[4]);
   joySpeed = joySpeedRaw;
   if (joySpeed > 1.0) joySpeed = 1.0;
-  if (joy->axes[4] == 0) joySpeed = 0;
+  //if (joy->axes[4] == 0) joySpeed = 0;
 
   if (joySpeed > 0) {
     joyDir = atan2(joy->axes[3], joy->axes[4]) * 180 / PI;
-    if (joy->axes[4] < 0) joyDir *= -1;
+    //if (joy->axes[4] < 0) joyDir *= -1;
   }
 
-  if (joy->axes[4] < 0 && !twoWayDrive) joySpeed = 0;
+  //if (joy->axes[4] < 0 && !twoWayDrive) joySpeed = 0;
 
   if (joy->axes[2] > -0.1) {
     autonomyMode = false;
@@ -689,17 +689,18 @@ int main(int argc, char** argv)
       if (pathRange < minPathRange) pathRange = minPathRange;
       float relativeGoalDis = adjacentRange;
 
+      float relativeGoalX = 0, relativeGoalY = 0;
       if (autonomyMode) {
-        float relativeGoalX = ((goalX - vehicleX) * cosVehicleYaw + (goalY - vehicleY) * sinVehicleYaw);
-        float relativeGoalY = (-(goalX - vehicleX) * sinVehicleYaw + (goalY - vehicleY) * cosVehicleYaw);
+        relativeGoalX = ((goalX - vehicleX) * cosVehicleYaw + (goalY - vehicleY) * sinVehicleYaw);
+        relativeGoalY = (-(goalX - vehicleX) * sinVehicleYaw + (goalY - vehicleY) * cosVehicleYaw);
 
         relativeGoalDis = sqrt(relativeGoalX * relativeGoalX + relativeGoalY * relativeGoalY);
         joyDir = atan2(relativeGoalY, relativeGoalX) * 180 / PI;
 
-        if (!twoWayDrive) {
+        /*if (!twoWayDrive) {
           if (joyDir > 90.0) joyDir = 90.0;
           else if (joyDir < -90.0) joyDir = -90.0;
-        }
+        }*/
       }
 
       bool pathFound = false;
@@ -802,10 +803,11 @@ int main(int argc, char** argv)
               dirDiff = 360.0 - dirDiff;
             }
 
-            float rotDirW;
-            if (rotDir < 18) rotDirW = fabs(fabs(rotDir - 9) + 1);
-            else rotDirW = fabs(fabs(rotDir - 27) + 1);
-            float score = (1 - sqrt(sqrt(dirWeight * dirDiff))) * rotDirW * rotDirW * rotDirW * rotDirW * penaltyScore;
+            //float rotDirW;
+            //if (rotDir < 18) rotDirW = fabs(fabs(rotDir - 9) + 1);
+            //else rotDirW = fabs(fabs(rotDir - 27) + 1);
+            float groupDirW = 4  - fabs(pathList[i % pathNum] - 3);
+            float score = (1 - sqrt(sqrt(dirWeight * dirDiff))) * groupDirW * groupDirW * penaltyScore;
             if (score > 0) {
               clearPathPerGroupScore[groupNum * rotDir + pathList[i % pathNum]] += score;
             }
