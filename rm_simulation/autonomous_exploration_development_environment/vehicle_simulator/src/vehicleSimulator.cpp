@@ -73,7 +73,8 @@ float vehiclePitch = 0;
 float vehicleYaw = 0;
 
 float vehicleYawRate = 0;
-float vehicleSpeed = 0;
+float vehicleFwdSpeed = 0;
+float vehicleLeftSpeed = 0;
 
 float terrainZ = 0;
 float terrainRoll = 0;
@@ -296,7 +297,8 @@ void terrainCloudHandler(const sensor_msgs::PointCloud2ConstPtr& terrainCloud2)
 
 void speedHandler(const geometry_msgs::TwistStamped::ConstPtr& speedIn)
 {
-  vehicleSpeed = speedIn->twist.linear.x;
+  vehicleFwdSpeed = speedIn->twist.linear.x;
+  vehicleLeftSpeed = speedIn->twist.linear.y;
   vehicleYawRate = speedIn->twist.angular.z;
 }
 
@@ -377,9 +379,9 @@ int main(int argc, char** argv)
     else if (vehicleYaw < -PI)
       vehicleYaw += 2 * PI;
 
-    vehicleX += 0.005 * cos(vehicleYaw) * vehicleSpeed +
+    vehicleX += 0.005 * cos(vehicleYaw) * vehicleFwdSpeed - 0.005 * sin(vehicleYaw) * vehicleLeftSpeed +
                 0.005 * vehicleYawRate * (-sin(vehicleYaw) * sensorOffsetX - cos(vehicleYaw) * sensorOffsetY);
-    vehicleY += 0.005 * sin(vehicleYaw) * vehicleSpeed +
+    vehicleY += 0.005 * sin(vehicleYaw) * vehicleFwdSpeed + 0.005 * cos(vehicleYaw) * vehicleLeftSpeed +
                 0.005 * vehicleYawRate * (cos(vehicleYaw) * sensorOffsetX - sin(vehicleYaw) * sensorOffsetY);
     vehicleZ = terrainZ + vehicleHeight;
 
@@ -409,7 +411,8 @@ int main(int argc, char** argv)
     odomData.twist.twist.angular.x = 200.0 * (vehicleRoll - vehicleRecRoll);
     odomData.twist.twist.angular.y = 200.0 * (vehiclePitch - vehicleRecPitch);
     odomData.twist.twist.angular.z = vehicleYawRate;
-    odomData.twist.twist.linear.x = vehicleSpeed;
+    odomData.twist.twist.linear.x = vehicleFwdSpeed;
+    odomData.twist.twist.linear.y = vehicleLeftSpeed;
     odomData.twist.twist.linear.z = 200.0 * (vehicleZ - vehicleRecZ);
     pubVehicleOdom.publish(odomData);
 
