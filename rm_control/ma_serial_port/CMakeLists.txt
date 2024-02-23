@@ -99,6 +99,7 @@ include_directories(
 add_executable(${PROJECT_NAME}_node src/ma_serial.cc src/crc.cc)
 add_executable(${PROJECT_NAME}_stop src/stop_moving.cc)
 add_executable(${PROJECT_NAME}_patrol src/patrol.cc)
+add_executable(${PROJECT_NAME}_receive src/ma_serial_2d_rec.cc)
 
 
 ## Add cmake target dependencies of the executable
@@ -117,6 +118,11 @@ target_link_libraries(${PROJECT_NAME}_stop
 )
 
 target_link_libraries(${PROJECT_NAME}_patrol
+  ${catkin_LIBRARIES}
+  ${serial_LIBRARIES}
+)
+
+target_link_libraries(${PROJECT_NAME}_receive
   ${catkin_LIBRARIES}
   ${serial_LIBRARIES}
 )
