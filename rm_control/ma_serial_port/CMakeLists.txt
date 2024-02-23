@@ -99,7 +99,7 @@ include_directories(
 add_executable(${PROJECT_NAME}_node src/ma_serial.cc src/crc.cc)
 add_executable(${PROJECT_NAME}_stop src/stop_moving.cc)
 add_executable(${PROJECT_NAME}_patrol src/patrol.cc)
-add_executable(${PROJECT_NAME}_receive src/ma_serial_2d_rec.cc)
+add_executable(${PROJECT_NAME}_receive src/ma_serial_2d_rec.cc src/crc.cc)
 
 
 ## Add cmake target dependencies of the executable
