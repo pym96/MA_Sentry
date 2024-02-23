@@ -13,6 +13,8 @@
 serial::Serial ser;
 std::thread receive_thread_;
 
+using ReceivePacket = ma_serial_packet::ReceivePacket;
+
 void cmd_velCallBack(const geometry_msgs::TwistStamped::ConstPtr& msg){
     
     try{
@@ -39,47 +41,32 @@ void receiveData()
 {
   std::vector<uint8_t> header(1);
   std::vector<uint8_t> data;
+
   data.reserve(sizeof(ReceivePacket));
 
   while (ros::ok()) {
     try {
-      serial_driver_->port()->receive(header);
+        ser.read(header.data(), 1);
 
       if (header[0] == 0x5A) {
         data.resize(sizeof(ReceivePacket) - 1);
-        serial_driver_->port()->receive(data);
+        ser.read(data.data(), sizeof(ReceivePacket));
 
         data.insert(data.begin(), header[0]);
-        ReceivePacket packet = fromVector(data);
+        ReceivePacket packet = ma_serial_packet::fromVector(data);
 
         bool crc_ok =
-          crc16::Verify_CRC16_Check_Sum(reinterpret_cast<const uint8_t *>(&packet), sizeof(packet));
+          crc16::verify_crc16_checksum(reinterpret_cast<const uint8_t *>(&packet), sizeof(packet));
         if (crc_ok) {
-          sensor_msgs::msg::JointState joint_state;
-          joint_state.header.stamp = this->now();
-          joint_state.name.push_back("pitch_joint");
-          joint_state.name.push_back("yaw_joint");
-          joint_state.position.push_back(packet.pitch);
-          joint_state.position.push_back(packet.yaw);
-          joint_state_pub_->publish(joint_state);
 
-          if (packet.aim_x > 0.01) {
-            aiming_point_.header.stamp = this->now();
-            aiming_point_.pose.position.x = packet.aim_x;
-            aiming_point_.pose.position.y = packet.aim_y;
-            aiming_point_.pose.position.z = packet.aim_z;
-            marker_pub_->publish(aiming_point_);
-          }
         } else {
-          RCLCPP_ERROR(get_logger(), "CRC error!");
+        ROS_ERROR("CRC error!");
         }
       } else {
-        RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 20, "Invalid header: %02X", header[0]);
+        // RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 20, "Invalid header: %02X", header[0]);
       }
     } catch (const std::exception & ex) {
-      RCLCPP_ERROR_THROTTLE(
-        get_logger(), *get_clock(), 20, "Error while receiving data: %s", ex.what());
-      reopenPort();
+
     }
   }
 }
@@ -119,7 +106,7 @@ int main(int argc, char** argv){
 
     if (ser.isOpen()) {
         ROS_INFO_STREAM("Serial port initialized.");
-        receive_thread_ = std::thread(&receiveData, this);
+        receive_thread_ = std::thread(receiveData);
     }else{
         return -1;
     }
