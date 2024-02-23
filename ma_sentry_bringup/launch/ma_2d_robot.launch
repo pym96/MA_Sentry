@@ -1,0 +1,20 @@
+<launch>
+  <!-- these are the arguments you can pass this launch file, for example paused:=true -->
+  <arg name="paused" default="true"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="verbose" default="true" />
+
+
+
+  <!-- Load the URDF into the ROS Parameter Server -->
+  <arg name="model" default="$(find ma_simulation)/urdf/ma_2d_robot.xacro" />
+ 
+  <param name="robot_description" command="$(find xacro)/xacro  --inorder $(arg model)" />
+ 
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+</launch>
