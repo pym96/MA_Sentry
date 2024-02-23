@@ -26,12 +26,11 @@ struct SendPacket{
 */
 struct ReceivePacket{
    uint8_t head = 0x5A;
-   int16_t v_x;
-   int16_t v_y;
-   int16_t a_z;
-   int16_t p_x;
-   int16_t p_y;
-   int16_t p_z;
+   float v_x;
+   float v_y;
+   float yaw;
+   float p_x;
+   float p_y;
    uint16_t checksum = 0;
 }__attribute__((packed));
 
