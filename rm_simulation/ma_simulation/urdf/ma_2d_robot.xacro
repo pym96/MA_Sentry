@@ -263,11 +263,11 @@
     <origin xyz="0.125 0.0 0.225" rpy="0 0 0"/>
     <parent link="base_link"/>
     <axis xyz="0 1 0" />
-    <child link="laser_frame"/>
+    <child link="laser"/>
   </joint>
 
   <!-- Hokuyo Laser -->
-  <link name="laser_frame">
+  <link name="laser">
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
