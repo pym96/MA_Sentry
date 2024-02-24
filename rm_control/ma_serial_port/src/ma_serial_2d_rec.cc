@@ -5,7 +5,9 @@
 #include <serial/serial.h>
 #include <std_msgs/UInt16.h>
 #include <tf/transform_broadcaster.h>
+#include <tf/tf.h>
 #include <geometry_msgs/Twist.h>
+#include <nav_msgs/Odometry.h>
 
 #include <string>
 #include <thread>
@@ -14,6 +16,7 @@ serial::Serial ser;
 std::thread receive_thread_;
 
 using ReceivePacket = ma_serial_packet::ReceivePacket;
+
 
 void cmd_velCallBack(const geometry_msgs::TwistStamped::ConstPtr& msg){
     
@@ -43,6 +46,9 @@ void receiveData()
   std::vector<uint8_t> data;
 
   data.reserve(sizeof(ReceivePacket));
+  ros::NodeHandle nh; // Create a node handle to advertise
+  ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 50);
+
 
   while (ros::ok()) {
     try {
@@ -58,9 +64,31 @@ void receiveData()
         bool crc_ok =
           crc16::verify_crc16_checksum(reinterpret_cast<const uint8_t *>(&packet), sizeof(packet));
         if (crc_ok) {
+           ROS_INFO("Current v_x is: %f,"
+          " v_y is: %f,"
+          " yaw is: %f,"
+          " x is: %f,"
+          " y is: %f", packet.v_x, packet.v_y, packet.yaw, packet.p_x, packet.p_y);
 
+          nav_msgs::Odometry odom;
+          odom.header.stamp = ros::Time::now();
+          odom.header.frame_id = "map";
+          odom.child_frame_id = "odom";
+          
+          odom.twist.twist.linear.x = packet.v_x;
+          odom.twist.twist.linear.y = packet.v_y;
+          // TODO: Add z angular velocity.
+
+          odom.pose.pose.position.x = packet.p_x;
+          odom.pose.pose.position.y = packet.p_y;
+
+          tf::Quaternion q;
+          q.setRPY(0, 0, packet.yaw);
+          tf::quaternionTFToMsg(q, odom.pose.pose.orientation);
+
+          odom_pub.publish(odom);
         } else {
-        ROS_ERROR("CRC error!");
+          ROS_ERROR("CRC error!");
         }
       } else {
         // RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 20, "Invalid header: %02X", header[0]);
@@ -113,6 +141,7 @@ int main(int argc, char** argv){
 
     ros::Publisher pub = nh.advertise<std_msgs::UInt16>("/ma_vel", 50);
     ros::Subscriber sub = nh.subscribe("/msg_pub/cmd_vel", 1000, cmd_velCallBack);
+    // ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 50);
     tf::TransformBroadcaster tf_broadcaster;
 
     while(ros::ok())
