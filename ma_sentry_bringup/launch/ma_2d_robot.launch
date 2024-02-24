@@ -7,8 +7,6 @@
   <arg name="debug" default="false"/>
   <arg name="verbose" default="true" />
 
-
-
   <!-- Load the URDF into the ROS Parameter Server -->
   <arg name="model" default="$(find ma_simulation)/urdf/ma_2d_robot.xacro" />
  
@@ -16,5 +14,8 @@
  
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="map2odom" args="0 0 0 0 0 0 /map /odom 1000" /> -->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="odom2base" args="0 0 0 0 0 0 /odom /base_footprint 1000" /> -->
 
 </launch>
