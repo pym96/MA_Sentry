@@ -9,6 +9,7 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <actionlib_msgs/GoalStatusArray.h>
 
 #include <string>
 #include <thread>
@@ -17,14 +18,16 @@ serial::Serial ser;
 std::thread receive_thread_;
 
 ros::Publisher odom_pub;
+ros::Publisher zero_vel_pub;
 
 using ReceivePacket = ma_serial_packet::ReceivePacket;
 
 
-void cmd_velCallBack(const geometry_msgs::TwistStamped::ConstPtr& msg);
+void cmd_velCallBack(const geometry_msgs::Twist::ConstPtr& msg);
 
 void receiveData();
 
+void statusCallback(const actionlib_msgs::GoalStatusArrayConstPtr& status);
 
 int main(int argc, char** argv){
 
@@ -67,8 +70,10 @@ int main(int argc, char** argv){
     }
 
     ros::Publisher pub = nh.advertise<std_msgs::UInt16>("/ma_vel", 50);
-    ros::Subscriber sub = nh.subscribe("/msg_pub/cmd_vel", 1000, cmd_velCallBack);
+    ros::Subscriber sub = nh.subscribe("/cmd_vel", 1000, cmd_velCallBack);
     odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 50);
+    zero_vel_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
+    ros::Subscriber status_sub = nh.subscribe("/move_base/status", 10, &statusCallback);
     // ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("/odom", 50);
 
     while(ros::ok())
@@ -78,20 +83,21 @@ int main(int argc, char** argv){
     return 0;
 }
 
-void cmd_velCallBack(const geometry_msgs::TwistStamped::ConstPtr& msg){
+void cmd_velCallBack(const geometry_msgs::Twist::ConstPtr& msg){
     
     try{
         ma_serial_packet::SendPacket packet;
         packet.head = 0x5A;
-        packet.linear_x = msg->twist.linear.x;
-        packet.linear_y = msg->twist.linear.y;
-        packet.angular_z = msg->twist.angular.z;
+        packet.linear_x = msg->linear.x;
+        packet.linear_y = -msg->linear.y;
+        packet.angular_z = msg->angular.z;
 
         crc16::append_crc16_checksum(reinterpret_cast<uint8_t *>(&packet), sizeof(packet));
         
-        ROS_INFO("Current msg: v_x: %f, v_y: %f, a_z: %f", msg->twist.linear.x, msg->twist.linear.y, msg->twist.angular.z);
+        ROS_INFO("Current msg: v_x: %f, v_y: %f, a_z: %f", msg->linear.x, msg->linear.y, msg->angular.z);
 
         uint8_t* packet_ptr = reinterpret_cast<uint8_t*>(&packet);
+        
 
         ser.write(packet_ptr, sizeof(packet));
         
@@ -136,7 +142,7 @@ void receiveData()
           odom.child_frame_id = "base_footprint";
 
           odom.twist.twist.linear.x = packet.v_x;
-          odom.twist.twist.linear.y = packet.v_y;
+          odom.twist.twist.linear.y = -packet.v_y;
           // TODO: Add z angular velocity.
 
           odom.pose.pose.position.x = packet.p_x;
@@ -153,7 +159,7 @@ void receiveData()
           odom_trans.header.frame_id = "odom";
           odom_trans.child_frame_id = "base_footprint";
 
-          odom_trans.transform.translation.x = packet.p_x;
+          odom_trans.transform.translation.x = -packet.p_x;
           odom_trans.transform.translation.y = packet.p_y;  
           odom_trans.transform.translation.z = 0.0;
 
@@ -177,4 +183,18 @@ void receiveData()
 
     }
   }
+}
+
+void statusCallback(const actionlib_msgs::GoalStatusArrayConstPtr& status){
+
+    for(const auto& goal_status : status->status_list){
+      if(goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED){
+        geometry_msgs::Twist zero_velocity;
+        zero_velocity.linear.x = 0;
+        zero_velocity.linear.y = 0;
+
+        zero_vel_pub.publish(zero_velocity);
+        break;
+      }
+    }
 }
