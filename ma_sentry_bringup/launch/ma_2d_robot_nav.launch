@@ -11,20 +11,25 @@
   <include file="$(find ma_simulation)/launch/amcl.launch"/>
 
   <param name="/use_sim_time" value="true" />
-  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
     <rosparam file="$(find ma_simulation)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
     <rosparam file="$(find ma_simulation)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find ma_simulation)/config/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find ma_simulation)/config/global_costmap_params.yaml" command="load" />
-    <rosparam file="$(find ma_simulation)/config/teb_local_planner_params.yaml" command="load" />
-    <rosparam file="$(find ma_simulation)/config/move_base_params.yaml" command="load" />
+    <!-- 加载DWA局部规划器的配置 -->
     <rosparam file="$(find ma_simulation)/config/dwa_local_planner_params.yaml" command="load" />
+    <!-- 确保加载move_base的通用参数 -->
+    <rosparam file="$(find ma_simulation)/config/move_base_params.yaml" command="load" />
+    <!-- 指定使用DWAPlannerROS作为base_local_planner -->
+    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+    
     <param name="base_global_planner" value="global_planner/GlobalPlanner" />
     <param name="planner_frequency" value="3.0" />
-    <param name="planner_patiency" value="5.0" />
+    <param name="planner_patience" value="5.0" />
     <param name="use_dijkstra" value="false" />
     <param name="clearing_rotation_allowed" value="false" />
     <remap from="/cmd_vel" to="/cmd_vel" />
-  </node>
+</node>
+
 
 </launch>
