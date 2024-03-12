@@ -176,6 +176,71 @@ void receiveData()
 
     }
   }
+
+
+```
+#include "ros/ros.h"
+
+#include <geometry_msgs/PointStamped.h>
+#include <nav_msgs/Odometry.h>
+#include <tf/transform_datatypes.h>
+#include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/Twist.h>
+
+class WayPointFollower{
+
+    public:
+        WayPointFollower(){
+
+            ros::NodeHandle nh;
+
+            waypoint_sub_ = nh.subscribe("/way_point", 10, &WayPointFollower::waypoint_callback, this);
+            odom_sub_ = nh.subscribe("/odometry", 10, &WayPointFollower::odom_callback, this);
+            
+            cmd_vel_pub_ = nh.advertise<geometry_msgs::TwistStamped>("/cmd_vel", 10);
+
+
+        }
+
+        void waypoint_callback(){
+
+        }
+
+        void odom_callback(){
+
+        }
+
+    private:
+        ros::Subscriber waypoint_sub_;
+        ros::Subscriber odom_sub_;
+        ros::Publisher cmd_vel_pub_;
+
+        geometry_msgs::Point target_point_;
+        geometry_msgs::Point current_position_;
+
+        bool has_reached_;
+        double distance_threshold_;
+
+};
+
+
+int main(int argc, char** argv){
+
+
+
+
+    return 0;
+}home/dan/learn/MA_Sentry/src/rm_control/rm_decision/src/pre_goal.cc:17:93: error: no matching function for call to ‘ros::NodeHandle::subscribe(const char [10], int, void (WayPointFollower::*)(), WayPointFollower*)’
+   17 |             odom_sub_ = nh.subscribe("/odometry", 10, &WayPointFollower::odom_callback, this);
+      |                                                                                             ^
+In file included from /opt/ros/noetic/include/ros/ros.h
+ChatGPT
+
+
+
+
+
+```
 }process[msg_pub-1]: started with pid [64262]
 [FATAL] [1708759957.379808170]: You must call ros::init() before creating the first NodeHandle
 [ERROR] [1708759957.388108871]: [registerPublisher] Failed to contact master at [:0].  Retrying...
