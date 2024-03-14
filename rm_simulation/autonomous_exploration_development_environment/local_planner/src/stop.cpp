@@ -65,11 +65,6 @@ void odom_handler(const nav_msgs::Odometry::ConstPtr& odomIn) {
     has_reached_callback();
 }
 
-void goal_handler(const geometry_msgs::PointStamped::ConstPtr& msg) {
-    goal_x = msg->point.x;
-    goal_y = msg->point.y;
-    goal_z = msg->point.z;
-}
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "robot_stop");
@@ -83,7 +78,7 @@ int main(int argc, char** argv) {
 
     while (ros::ok()) {
         std_msgs::Int8 reached;
-        reached.data = has_reached ? 0 : 1;
+        reached.data = has_reached ? 1 : 0;
         
         stop_pub.publish(reached);
 
