@@ -342,8 +342,8 @@ int main(int argc, char** argv)
         vehicleYawRate = 0;
       }
 
-      if (safetyStop >= 1) vehicleSpeed = 0;
-      if (safetyStop >= 2) vehicleYawRate = 0;
+      if (safetyStop == 1) vehicleSpeed = 0;
+      // if (safetyStop == 2) vehicleYawRate = 0;
 
       pubSkipCount--;
       if (pubSkipCount < 0) {

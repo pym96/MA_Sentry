@@ -20,8 +20,9 @@ double curr_roll;
 double curr_pitch;
 double curr_yaw;
 
-double waypoint_xy_radius = 0.5;
+double waypoint_xy_radius = 0.52;
 double waypoint_z_bound = 5.0;
+double dis;
 
 bool has_reached = false;
 
@@ -32,7 +33,11 @@ void has_reached_callback() {
         float disY = curr_y - goal_y;
         float disZ = curr_z - goal_z;
 
-        if (sqrt(disX * disX + disY * disY) < waypoint_xy_radius && fabs(disZ) < waypoint_z_bound) {
+        dis = sqrt(disX * disX + disY * disY);
+        
+
+        if (dis < waypoint_xy_radius) {
+            ROS_INFO("Current dis is: %f", dis);
             has_reached = true;
         }
     }
@@ -74,7 +79,7 @@ int main(int argc, char** argv) {
     ros::Subscriber goal_sub = nh.subscribe<geometry_msgs::PointStamped>("/way_point", 5, goal_handler);
     ros::Publisher stop_pub = nh.advertise<std_msgs::Int8>("/stop", 10);
 
-    ros::Rate rate(10); // 10 Hz
+    ros::Rate rate(100); // 100 Hz
 
     while (ros::ok()) {
         std_msgs::Int8 reached;
