@@ -26,16 +26,29 @@ double waypoint_z_bound = 5.0;
 bool has_reached = false;
 
 void has_reached_callback() {
-    float disX = curr_x - goal_x;
-    float disY = curr_y - goal_y;
-    float disZ = curr_z - goal_z;
+    // 只有在还未到达目标点时才检查是否已到达
+    if (!has_reached) {
+        float disX = curr_x - goal_x;
+        float disY = curr_y - goal_y;
+        float disZ = curr_z - goal_z;
 
-    if (sqrt(disX * disX + disY * disY) < waypoint_xy_radius && fabs(disZ) < waypoint_z_bound && !has_reached) {
-        has_reached = true;
-    } else {
-        has_reached = false;
+        if (sqrt(disX * disX + disY * disY) < waypoint_xy_radius && fabs(disZ) < waypoint_z_bound) {
+            has_reached = true;
+        }
     }
 }
+
+
+void goal_handler(const geometry_msgs::PointStamped::ConstPtr& msg) {
+    goal_x = msg->point.x;
+    goal_y = msg->point.y;
+    goal_z = msg->point.z;
+
+    // 收到新目标点时重置 has_reached 状态
+    has_reached = false;
+}
+
+
 
 void odom_handler(const nav_msgs::Odometry::ConstPtr& odomIn) {
     odom_time = odomIn->header.stamp.toSec();
