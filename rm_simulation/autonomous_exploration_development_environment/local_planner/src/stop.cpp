@@ -6,14 +6,13 @@
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
 
+double goal_x = 0.0;
+double goal_y = 0.0;
+double goal_z = 0.0;
 
-double goal_x;
-double goal_y;
-double goal_z;
-
-double curr_x;
-double curr_y;
-double curr_z;
+double curr_x = 0.0;
+double curr_y = 0.0;
+double curr_z = 0.0;
 
 double odom_time;
 
@@ -26,67 +25,58 @@ double waypoint_z_bound = 5.0;
 
 bool has_reached = false;
 
-void has_reached_callback(){
-
+void has_reached_callback() {
     float disX = curr_x - goal_x;
     float disY = curr_y - goal_y;
     float disZ = curr_z - goal_z;
 
-      // start waiting if the current waypoint is reached
     if (sqrt(disX * disX + disY * disY) < waypoint_xy_radius && fabs(disZ) < waypoint_z_bound && !has_reached) {
-      has_reached = true;
-    }else{
-      has_reached = false;
+        has_reached = true;
+    } else {
+        has_reached = false;
     }
-    
 }
 
-void odom_handler(const nav_msgs::Odometry::ConstPtr& odomIn)
-{
-  odom_time = odomIn->header.stamp.toSec();
+void odom_handler(const nav_msgs::Odometry::ConstPtr& odomIn) {
+    odom_time = odomIn->header.stamp.toSec();
 
-  double roll, pitch, yaw;
-  geometry_msgs::Quaternion geoQuat = odomIn->pose.pose.orientation;
+    geometry_msgs::Quaternion geoQuat = odomIn->pose.pose.orientation;
+    tf::Quaternion quat;
+    tf::quaternionMsgToTF(geoQuat, quat);
+    tf::Matrix3x3(quat).getRPY(curr_roll, curr_pitch, curr_yaw);
 
-  curr_roll = roll;
-  curr_pitch = pitch;
-  curr_yaw = yaw;
-  curr_x = odomIn->pose.pose.position.x;
-  curr_y = odomIn->pose.pose.position.y;
-  curr_z = odomIn->pose.pose.position.z;
+    curr_x = odomIn->pose.pose.position.x;
+    curr_y = odomIn->pose.pose.position.y;
+    curr_z = odomIn->pose.pose.position.z;
+
+    has_reached_callback();
 }
 
-void goal_handler(geometry_msgs::PointStamped::ConstPtr& msg){
-  goal_x = msg->point.x;
-  goal_y = msg->point.y;
+void goal_handler(const geometry_msgs::PointStamped::ConstPtr& msg) {
+    goal_x = msg->point.x;
+    goal_y = msg->point.y;
+    goal_z = msg->point.z;
 }
 
-int main(int argc, char** argv){
-
+int main(int argc, char** argv) {
     ros::init(argc, argv, "robot_stop");
     ros::NodeHandle nh;
     
     ros::Subscriber odom_sub = nh.subscribe<nav_msgs::Odometry>("/state_estimation", 5, odom_handler);
-    ros::Subscriber goal_sub = nh.subscribe<geometry_msgs::PointStamped>("/way_point",5, goal_handler);
+    ros::Subscriber goal_sub = nh.subscribe<geometry_msgs::PointStamped>("/way_point", 5, goal_handler);
     ros::Publisher stop_pub = nh.advertise<std_msgs::Int8>("/stop", 10);
 
-    bool status = ros::ok();
+    ros::Rate rate(10); // 10 Hz
 
-    std_msgs::Int8 reached = 0;
-
-    while(status){
-
-        // TODO: 
-        if(!has_reached){
-            reached = 1;
-        }else{
-            reached = 0;
-        }
+    while (ros::ok()) {
+        std_msgs::Int8 reached;
+        reached.data = has_reached ? 0 : 1;
         
         stop_pub.publish(reached);
 
+        ros::spinOnce();
+        rate.sleep();
     }
-
 
     return 0;
 }
