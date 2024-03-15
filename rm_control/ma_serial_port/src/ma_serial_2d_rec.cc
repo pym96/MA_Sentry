@@ -88,8 +88,8 @@ void cmd_velCallBack(const geometry_msgs::Twist::ConstPtr& msg){
     try{
         ma_serial_packet::SendPacket packet;
         packet.head = 0x5A;
-        packet.linear_x = msg->linear.x;
-        packet.linear_y = -msg->linear.y;
+        packet.linear_x = -msg->linear.x;
+        packet.linear_y = msg->linear.y;
         packet.angular_z = msg->angular.z;
 
         crc16::append_crc16_checksum(reinterpret_cast<uint8_t *>(&packet), sizeof(packet));
@@ -98,7 +98,6 @@ void cmd_velCallBack(const geometry_msgs::Twist::ConstPtr& msg){
 
         uint8_t* packet_ptr = reinterpret_cast<uint8_t*>(&packet);
         
-
         ser.write(packet_ptr, sizeof(packet));
         
     }catch(const std::exception& ex){
@@ -159,12 +158,13 @@ void receiveData()
           odom_trans.header.frame_id = "odom";
           odom_trans.child_frame_id = "base_footprint";
 
-          odom_trans.transform.translation.x = -packet.p_x;
-          odom_trans.transform.translation.y = packet.p_y;  
+          odom_trans.transform.translation.x = packet.p_x;
+          odom_trans.transform.translation.y = -packet.p_y;  
           odom_trans.transform.translation.z = 0.0;
 
           tf2::Quaternion q_;
-          q_.setRPY(0, 0, packet.yaw);
+          double yaw = packet.yaw * M_PI / 180;
+          q_.setRPY(0, 0, yaw);
           odom_trans.transform.rotation.x = q_.x();
           odom_trans.transform.rotation.y = q_.y();
           odom_trans.transform.rotation.z = q_.z();
