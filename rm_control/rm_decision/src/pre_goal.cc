@@ -6,19 +6,19 @@
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/Twist.h>
 
-class WayPointFollower{
+#include <behaviortree_cpp_v3/behavior_tree.h>
 
+#include "rm_decision/patrol.hpp"
+
+class WayPointFollower{
     public:
         WayPointFollower(){
-
             ros::NodeHandle nh;
 
             waypoint_sub_ = nh.subscribe<geometry_msgs::PointStamped>("/way_point", 10, &WayPointFollower::waypoint_callback, this);
             odom_sub_ = nh.subscribe<nav_msgs::Odometry>("/odometry", 10, &WayPointFollower::odom_callback, this);
             
             cmd_vel_pub_ = nh.advertise<geometry_msgs::TwistStamped>("/cmd_vel", 10);
-
-
         }
 
         void waypoint_callback(const geometry_msgs::PointStamped::ConstPtr& msg){
@@ -38,20 +38,8 @@ class WayPointFollower{
                                         std::pow(target_point_.y - current_position_.y,2) +
                                         std::pow(target_point_.z - current_position_.z, 2));
             
-            if(distance <= distance_threshold_){
-                has_reached_ = true;
-                stop_moving();
-            }else{
-                // TODO: keep moving
-            }
+    
 
-        }
-
-        void stop_moving(){
-            geometry_msgs::TwistStamped cmd_vel;
-            cmd_vel.twist.linear.x = 0.0;
-            cmd_vel.twist.linear.z = 0.0;
-            cmd_vel_pub_.publish(cmd_vel);
         }
 
     private:
@@ -71,9 +59,11 @@ int main(int argc, char** argv){
 
     ros::init(argc, argv, "robot_decision");
 
-    
-    
+    ros::NodeHandle nh;
+
+    BT::BehaviorTreeFactory factory;
 
 
+   
     return 0;
 }
