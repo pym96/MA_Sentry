@@ -27,9 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include
-#  LIBRARIES rm_decision
-#  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp tf
-#  DEPENDS system_lib
+ CATKIN_DEPENDS ${ROS_DEPENDENCIES}
 )
 
 ## Specify additional locations of header files
@@ -42,10 +40,10 @@ include
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_test_node src/pre_goal.cc src/patrol.cc)
+add_executable(${PROJECT_NAME}_test_node src/pre_goal.cc src/patrol.cc src/random_explore.cc)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_test_node
-  ${catkin_LIBRARIES}
+  ${catkin_LIBRARIES} 
 )
 

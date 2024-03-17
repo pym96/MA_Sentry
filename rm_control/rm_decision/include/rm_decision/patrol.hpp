@@ -9,6 +9,7 @@ class PatrolAction: public BT::SyncActionNode
     public:
         PatrolAction(const std::string& name, const BT::NodeConfiguration& config);
         BT::NodeStatus tick() override;
+        static BT::PortsList providedPorts();
 };
 
 

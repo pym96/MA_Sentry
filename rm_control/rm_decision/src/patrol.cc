@@ -8,3 +8,7 @@ BT::NodeStatus PatrolAction::tick(){
     // Patrol logic
     return BT::NodeStatus::RUNNING;
 }
+
+BT::PortsList PatrolAction::providedPorts(){
+    return {};
+}
