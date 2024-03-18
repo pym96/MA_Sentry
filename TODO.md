@@ -1,20 +1,21 @@
-```
-#include <ros/ros.h>
+```#include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/common/geometry.h>
-#include <execution> // C++17 execution policies
+#include <omp.h> // C++17 execution policies
 #include <vector>
 #include <mutex>
+#include <iostream>
 
 class CloudFilter {
 public:
-    CloudFilter() {
+    CloudFilter(const double& radius) {
         // Initialize ROS node
         ros::NodeHandle nh;
 
+        this->radius_ = radius;
         // Subscribe to point cloud data
         sub = nh.subscribe("/cloud_registered", 1, &CloudFilter::cloudCallback, this);
 
@@ -35,14 +36,12 @@ public:
         center.x = 0.0;
         center.y = 0.0;
         center.z = 0.0;
-        double radius = 0.35;
-
         // Mutex for thread-safe push_back operation
         std::mutex mutex;
 
         // Iterate through each point in parallel and add it to the filtered cloud if it's outside the radius
-        std::for_each(std::execution::par, cloud->begin(), cloud->end(), [&](const pcl::PointXYZ& point) {
-            if (pcl::geometry::distance(point, center) >= radius) {
+        Concurrency::parallel_for_each(cloud->begin(), cloud->end(), [&](const pcl::PointXYZ& point) {
+            if (pcl::geometry::distance(point, center) >= this->radius_) {
                 std::lock_guard<std::mutex> lock(mutex);
                 cloud_filtered->push_back(point);
             }
@@ -60,14 +59,28 @@ public:
 private:
     ros::Subscriber sub;
     ros::Publisher pub;
+    double radius_;
 };
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "cloud_filter_node");
-    CloudFilter cloudFilter;
+
+    ros::NodeHandle nh;
+
+    double radius_;
+
+    if (nh.getParam("/ma_cloud_filter/radius", radius_)) {
+        ROS_INFO("Current port name is %s, baud rate is %f.", radius_);
+    } else {
+        ROS_ERROR("Failed to retrieve the port parameter.");
+        return 1;
+    }
+
+    CloudFilter cloudFilter(radius_);
     ros::spin();
     return 0;
 }
+
 ```
 
 Errors     << ma_sentry_bringup:make /home/dan/learn/MA_Sentry/logs/ma_sentry_bringup/build.make.149.log
