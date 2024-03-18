@@ -4,7 +4,7 @@
 #include <ros/ros.h>
 #include <serial/serial.h>
 #include <std_msgs/UInt16.h>
-#include <std_msgs/UInt8.h>
+#include <std_msgs/Int8.h>
 #include <geometry_msgs/TwistStamped.h>
 
 #include <tf/transform_broadcaster.h>
@@ -14,7 +14,7 @@
 #include <vector>
 
 serial::Serial ser;
-std_msgs::UInt8 navigating;
+std_msgs::Int8 navigating;
 std::thread receive_thread_;
 
 using ReceivePacket = ma_serial_packet::ReceivePacket;
@@ -34,9 +34,9 @@ void cmd_velCallBack(const geometry_msgs::TwistStamped::ConstPtr& msg) {
                  msg->twist.linear.x, msg->twist.linear.y, msg->twist.angular.z, navigating.data);
 
         if(navigating.data == 0) 
-            ROS_INFO("Navigating.");
+            ROS_INFO_STREAM("\033[1;32m Navigating.\033");
         else 
-            ROS_INFO("Waiting for navigating.");
+            ROS_INFO_STREAM("\033[1;33m Waiting for navigating.\033");
         
         ser.write(reinterpret_cast<uint8_t*>(&packet), sizeof(packet));
     } catch(const std::exception& ex) {
@@ -44,7 +44,7 @@ void cmd_velCallBack(const geometry_msgs::TwistStamped::ConstPtr& msg) {
     }
 }
 
-void nav_callBack(const std_msgs::UInt8::ConstPtr& msg) {
+void nav_callBack(const std_msgs::Int8::ConstPtr& msg) {
     navigating.data = msg->data;
     ROS_INFO("Current state is: %d", navigating.data);
 }
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
 
     ros::Publisher pub = nh.advertise<std_msgs::UInt16>("/ma_vel", 50);
     ros::Subscriber sub = nh.subscribe<geometry_msgs::TwistStamped>("/cmd_vel", 100, cmd_velCallBack);
-    ros::Subscriber stop_sub = nh.subscribe<std_msgs::UInt8>("/stop", 10, nav_callBack);
+    ros::Subscriber stop_sub = nh.subscribe<std_msgs::Int8>("/stop", 10, nav_callBack);
 
     ros::spin();
 
