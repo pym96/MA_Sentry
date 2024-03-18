@@ -24,7 +24,7 @@ double waypoint_xy_radius = 0.52;
 double waypoint_z_bound = 5.0;
 double dis;
 
-bool has_reached = false;
+bool has_reached = true;
 
 void has_reached_callback() {
     // 只有在还未到达目标点时才检查是否已到达
@@ -81,10 +81,11 @@ int main(int argc, char** argv) {
 
     ros::Rate rate(100); // 100 Hz
 
+
     while (ros::ok()) {
         std_msgs::Int8 reached;
         reached.data = has_reached ? 1 : 0;
-        
+
         stop_pub.publish(reached);
 
         ros::spinOnce();
