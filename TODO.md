@@ -1,3 +1,4 @@
+```
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -67,3 +68,16 @@ int main(int argc, char** argv) {
     ros::spin();
     return 0;
 }
+```
+
+Errors     << ma_sentry_bringup:make /home/dan/learn/MA_Sentry/logs/ma_sentry_bringup/build.make.149.log
+/home/dan/learn/MA_Sentry/src/ma_sentry_bringup/src/cloud_filter.cc: In member function ‘void CloudFilter::cloudCallback(const PointCloud2ConstPtr&)’:
+/home/dan/learn/MA_Sentry/src/ma_sentry_bringup/src/cloud_filter.cc:43:28: error: ‘std::execution’ has not been declared
+   43 |         std::for_each(std::execution::par, cloud->begin(), cloud->end(), [&](const pcl::PointXYZ& point) {
+      |                            ^~~~~~~~~
+make[2]: *** [CMakeFiles/pcl_filter_node.dir/build.make:63: CMakeFiles/pcl_filter_node.dir/src/cloud_filter.cc.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:225: CMakeFiles/pcl_filter_node.dir/all] Error 2
+make: *** [Makefile:141: all] Error 2
+cd /home/dan/learn/MA_Sentry/build/ma_sentry_bringup; catkin build --get-env ma_sentry_bringup | catkin env -si  /usr/bin/make --jobserver-auth=3,4; cd -
+
+.....................
