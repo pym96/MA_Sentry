@@ -2,13 +2,16 @@ cmake_minimum_required(VERSION 3.0.2)
 project(ma_sentry_bringup)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
-
+set(CXX_STANDARD 17)
+set(CXX_STANDARD_REQUIREDO ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  pcl_ros
+  sensor_msgs
   nav_msgs
 )
 
@@ -133,6 +136,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(clock_wise_node src/change_clock_wise_dir.cc)
+add_executable(pcl_filter_node src/cloud_filter.cc)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -148,6 +152,12 @@ add_executable(clock_wise_node src/change_clock_wise_dir.cc)
 target_link_libraries(clock_wise_node
   ${catkin_LIBRARIES}
 )
+
+target_link_libraries(pcl_filter_node
+  ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES}
+)
+
 
 #############
 ## Install ##
