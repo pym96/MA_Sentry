@@ -1,53 +1,53 @@
-cmake_minimum_required(VERSION 3.0.2)
-project(rm_decision)
+#include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/filters/radius_outlier_removal.h>
 
-## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+class CloudFilter {
+public:
+    CloudFilter() {
+        // 初始化ROS节点
+        ros::NodeHandle nh;
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
-  behaviortree_cpp_v3
-  sensor_msgs
-  nav_msgs
-  roscpp
-  tf
-)
+        // 订阅点云数据
+        sub = nh.subscribe("/cloud_registered", 1, &CloudFilter::cloudCallback, this);
 
-find_package(behaviortree_cpp_v3 REQUIRED)
+        // 发布过滤后的点云
+        pub = nh.advertise<sensor_msgs::PointCloud2>("cloud_filtered", 1);
+    }
 
-set(CMAKE_CXX_STANDARD 17)
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if your package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
- INCLUDE_DIRS include
- CATKIN_DEPENDS ${ROS_DEPENDENCIES}
-)
+    void cloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) {
+        // 将ROS消息转换为PCL点云
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::fromROSMsg(*cloud_msg, *cloud);
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(
-include
-  ${catkin_INCLUDE_DIRS}
-  ${BEHAVIORTREEV3_INCLUDE_DIRS}
-)
+        // 创建过滤器并应用
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::RadiusOutlierRemoval<pcl::PointXYZ> outrem;
+        outrem.setInputCloud(cloud);
+        outrem.setRadiusSearch(0.35);
+        outrem.setMinNeighborsInRadius(2); // 设置在0.35半径内最小邻居数，根据需要调整
+        outrem.filter(*cloud_filtered);
 
-## Declare a C++ executable
-## With catkin_make all packages are built within a single CMake context
-## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_test_node src/pre_goal.cc src/patrol.cc src/random_explore.cc)
+        // 将过滤后的点云转换回ROS消息
+        sensor_msgs::PointCloud2 output;
+        pcl::toROSMsg(*cloud_filtered, output);
+        output.header.frame_id = cloud_msg->header.frame_id; // 保持帧ID
 
-## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_test_node
-  ${catkin_LIBRARIES}  BT::behaviortree_cpp_v3
-)
+        // 发布过滤后的点云
+        pub.publish(output);
+    }
 
+private:
+    ros::Subscriber sub;
+    ros::Publisher pub;
+};
+
+int main(int argc, char** argv) {
+    ros::init(argc, argv, "cloud_filter_node");
+    CloudFilter cloudFilter;
+    ros::spin();
+    return 0;
+}
