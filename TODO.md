@@ -22,39 +22,46 @@ public:
         // Publish filtered point cloud
         pub = nh.advertise<sensor_msgs::PointCloud2>("cloud_filtered", 1);
     }
+void cloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) {
+    // Convert ROS message to PCL point cloud
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::fromROSMsg(*cloud_msg, *cloud);
 
-    void cloudCallback(const sensor_msgs::PointCloud2ConstPtr& cloud_msg) {
-        // Convert ROS message to PCL point cloud
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        pcl::fromROSMsg(*cloud_msg, *cloud);
+    // Create a new point cloud for the filtered results
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
 
-        // Create a new point cloud for the filtered results
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
+    // Define the center point for filtering
+    pcl::PointXYZ center; // Set the appropriate values for the center
+    center.x = 0.0;
+    center.y = 0.0;
+    center.z = 0.0;
 
-        // Define the center point and radius for filtering
-        pcl::PointXYZ center; // Set the appropriate values for the center
-        center.x = 0.0;
-        center.y = 0.0;
-        center.z = 0.0;
-        // Mutex for thread-safe push_back operation
-        std::mutex mutex;
+    #pragma omp parallel
+    {
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered_private(new pcl::PointCloud<pcl::PointXYZ>);
 
-        // Iterate through each point in parallel and add it to the filtered cloud if it's outside the radius
-        Concurrency::parallel_for_each(cloud->begin(), cloud->end(), [&](const pcl::PointXYZ& point) {
-            if (pcl::geometry::distance(point, center) >= this->radius_) {
-                std::lock_guard<std::mutex> lock(mutex);
-                cloud_filtered->push_back(point);
+        #pragma omp for nowait
+        for (size_t i = 0; i < cloud->size(); ++i) {
+            if (pcl::geometry::distance(cloud->points[i], center) >= this->radius_) {
+                cloud_filtered_private->push_back(cloud->points[i]);
             }
-        });
+        }
 
-        // Convert the filtered point cloud back to a ROS message
-        sensor_msgs::PointCloud2 output;
-        pcl::toROSMsg(*cloud_filtered, output);
-        output.header.frame_id = cloud_msg->header.frame_id;
-
-        // Publish the filtered point cloud
-        pub.publish(output);
+        #pragma omp critical
+        *cloud_filtered += *cloud_filtered_private;
     }
+
+    // Convert the filtered point cloud back to a ROS message
+    sensor_msgs::PointCloud2 output;
+    pcl::toROSMsg(*cloud_filtered, output);
+    output.header.frame_id = cloud_msg->header.frame_id;
+
+    // Publish the filtered point cloud
+    pub.publish(output);
+}
+
+ 
+
 
 private:
     ros::Subscriber sub;
