@@ -6,6 +6,7 @@
 RandomExplore::RandomExplore(const std::string& name, const BT::NodeConfiguration& config)
     : BT::SyncActionNode(name, config){
 
+    nh_ = ros::NodeHandle("~");
     way_point_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/way_point", 10);
     stop_sub_ = nh_.subscribe("/stop", 10, &RandomExplore::stop_callback, this);
     goal_reached_ = false;
@@ -23,15 +24,15 @@ BT::NodeStatus RandomExplore::tick(){
 
     // Generate a random point within a 5-meter radius
     float angle = static_cast<float>(rand()) / RAND_MAX * 2 * M_PI;
-    float radius = static_cast<float>(rand()) / RAND_MAX * 5;   
+    float radius = static_cast<float>(rand()) / RAND_MAX * 0.5;   
     geometry_msgs::PointStamped new_goal;
-    new_goal.header.frame_id = "vehicle";
+    new_goal.header.frame_id = "map";
     new_goal.point.x = cos(angle) * radius;
     new_goal.point.y = sin(angle) * radius;
     new_goal.header.stamp = ros::Time::now();
     way_point_pub_.publish(new_goal);
 
-    return BT::NodeStatus::RUNNING;
+    return BT::NodeStatus::FAILURE;
 }
 
 // void RandomExplore::halt(){

@@ -1,7 +1,7 @@
 #ifndef __RANDOM_EXPLORE_HPP
 #define __RANDOM_EXPLORE_HPP
 
-#include <behaviortree_cpp/action_node.h>
+#include <behaviortree_cpp_v3/action_node.h>
 #include <ros/ros.h>
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Int8.h>

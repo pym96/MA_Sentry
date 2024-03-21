@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
   tf
 )
 
+
+set(CMAKE_CXX_STANDARD 17)
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -27,7 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include
- CATKIN_DEPENDS ${ROS_DEPENDENCIES}
+ CATKIN_DEPENDS geometry_msgs roscpp sensor_msgs nav_msgs tf behaviortree_cpp_v3
 )
 
 ## Specify additional locations of header files
@@ -35,15 +37,16 @@ catkin_package(
 include_directories(
 include
   ${catkin_INCLUDE_DIRS}
+  ${BEHAVIORTREEV3_INCLUDE_DIRS}
 )
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_test_node src/pre_goal.cc src/patrol.cc src/random_explore.cc)
-
+add_executable(${PROJECT_NAME}_test_node src/random_radius_explore.cc src/patrol.cc src/random_explore.cc)
+# add_dependencies(${PROJECT_NAME}_test_node ${catkin_LIBRARIES})
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_test_node
-  ${catkin_LIBRARIES} 
+  ${catkin_LIBRARIES}  
 )
 

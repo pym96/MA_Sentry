@@ -6,7 +6,7 @@ PatrolAction::PatrolAction(const std::string& name, const BT::NodeConfiguration&
 
 BT::NodeStatus PatrolAction::tick(){
     // Patrol logic
-    return BT::NodeStatus::RUNNING;
+    return BT::NodeStatus::SUCCESS;
 }
 
 BT::PortsList PatrolAction::providedPorts(){
