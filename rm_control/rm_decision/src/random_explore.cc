@@ -36,13 +36,9 @@ void RandomExplore::stop_callback(const std_msgs::Int8::ConstPtr& msg) {
 }
 
 BT::NodeStatus RandomExplore::tick() {
-    if (!goal_reached_) {
-        // 如果还在导航中，直接返回失败，不执行随机探索
-        return BT::NodeStatus::FAILURE;
-    }
-
-    if (!initial_position_set) {
-        // 如果初始位置未设置，返回失败，不执行随机探索
+    ROS_INFO("Tick function called: goal_reached_ = %d, initial_position_set = %d", goal_reached_, initial_position_set);
+    if (!goal_reached_ || !initial_position_set) {
+        ROS_INFO("Exiting tick: Conditions not met");
         return BT::NodeStatus::FAILURE;
     }
 
@@ -56,5 +52,5 @@ BT::NodeStatus RandomExplore::tick() {
     new_goal.header.stamp = ros::Time::now();
     way_point_pub_.publish(new_goal);
 
-    return BT::NodeStatus::RUNNING;  // 返回RUNNING状态，表示随机探索正在进行
+    return BT::NodeStatus::SUCCESS;  // 一旦完成一次操作，返回SUCCESS
 }
