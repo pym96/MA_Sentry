@@ -9,7 +9,7 @@ RandomExplore::RandomExplore(const std::string& name, const BT::NodeConfiguratio
     nh_ = ros::NodeHandle("~");
     way_point_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/way_point", 10);
     stop_sub_ = nh_.subscribe("/stop", 10, &RandomExplore::stop_callback, this);
-    odom_sub_ = nh_.subscribe<nav_msgs::Odometry>("/state_estimation", 5, &RandomExplore::odom_callback);
+    odom_sub_ = nh_.subscribe<nav_msgs::Odometry>("/state_estimation", 5, &RandomExplore::odom_callback, this);
     srand(time(NULL));
 }
 
@@ -37,7 +37,8 @@ void RandomExplore::stop_callback(const std_msgs::Int8::ConstPtr& msg) {
 
 BT::NodeStatus RandomExplore::tick() {
     ROS_INFO("Tick function called: goal_reached_ = %d, initial_position_set = %d", goal_reached_, initial_position_set);
-    if (!goal_reached_ || !initial_position_set) {
+    ROS_INFO("Tick function called: curr_x = %f, curr_y = %f", initial_position.x, initial_position.y);
+    if (!goal_reached_) {
         ROS_INFO("Exiting tick: Conditions not met");
         return BT::NodeStatus::FAILURE;
     }
@@ -47,8 +48,8 @@ BT::NodeStatus RandomExplore::tick() {
     float radius = static_cast<float>(rand()) / RAND_MAX * 5;
     geometry_msgs::PointStamped new_goal;
     new_goal.header.frame_id = "vehicle";  // 使用"vehicle"作为参考坐标系
-    new_goal.point.x = cos(angle) * radius;
-    new_goal.point.y = sin(angle) * radius;
+    new_goal.point.x = initial_position.x + cos(angle) * radius;
+    new_goal.point.y = initial_position.y + sin(angle) * radius;
     new_goal.header.stamp = ros::Time::now();
     way_point_pub_.publish(new_goal);
 
