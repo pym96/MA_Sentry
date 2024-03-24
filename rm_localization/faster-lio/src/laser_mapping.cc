@@ -1,10 +1,12 @@
 #include <tf/transform_broadcaster.h>
+#include <tf/tf.h>
 #include <yaml-cpp/yaml.h>
 #include <execution>
 #include <fstream>
 
 #include "laser_mapping.h"
 #include "utils.h"
+
 
 namespace faster_lio {
 
@@ -412,7 +414,23 @@ void LaserMapping::LivoxPCLCallBack(const livox_ros_driver::CustomMsg::ConstPtr 
 
 void LaserMapping::IMUCallBack(const sensor_msgs::Imu::ConstPtr &msg_in) {
     publish_count_++;
+
+    double angular_y, angular_z, linear_acceleration_x, linear_acceleration_y, linear_acceleration_z;
+
+    angular_y = msg_in->angular_velocity.y;
+    angular_z = msg_in->angular_velocity.z;
+    linear_acceleration_x = msg_in->linear_acceleration.x;
+    linear_acceleration_y = msg_in->linear_acceleration.y;
+    linear_acceleration_z = msg_in->linear_acceleration.z;
+
     sensor_msgs::Imu::Ptr msg(new sensor_msgs::Imu(*msg_in));
+
+    msg->linear_acceleration.x = linear_acceleration_x;
+    msg->linear_acceleration.y = linear_acceleration_y;
+    msg->linear_acceleration.z = linear_acceleration_z;
+    msg->angular_velocity.y = angular_y;
+    msg->angular_velocity.z = angular_z;
+    
 
     if (abs(timediff_lidar_wrt_imu_) > 0.1 && time_sync_en_) {
         msg->header.stamp = ros::Time().fromSec(timediff_lidar_wrt_imu_ + msg_in->header.stamp.toSec());
@@ -430,6 +448,7 @@ void LaserMapping::IMUCallBack(const sensor_msgs::Imu::ConstPtr &msg_in) {
     imu_buffer_.emplace_back(msg);
     mtx_buffer_.unlock();
 }
+
 
 bool LaserMapping::SyncPackages() {
     if (lidar_buffer_.empty() || imu_buffer_.empty()) {
@@ -809,12 +828,34 @@ void LaserMapping::Savetrajectory(const std::string &traj_file) {
 template <typename T>
 void LaserMapping::SetPosestamp(T &out) {
     out.pose.position.x = state_point_.pos(0);
-    out.pose.position.y = state_point_.pos(1);
-    out.pose.position.z = state_point_.pos(2);
-    out.pose.orientation.x = state_point_.rot.coeffs()[0];
-    out.pose.orientation.y = state_point_.rot.coeffs()[1];
-    out.pose.orientation.z = state_point_.rot.coeffs()[2];
-    out.pose.orientation.w = state_point_.rot.coeffs()[3];
+    out.pose.position.y = -state_point_.pos(1);
+    out.pose.position.z = -state_point_.pos(2);
+
+   tf::Quaternion q(
+      // 获得当前四元数
+        state_point_.rot.coeffs()[0],
+        state_point_.rot.coeffs()[1],
+        state_point_.rot.coeffs()[2],
+        state_point_.rot.coeffs()[3]);
+
+    // 四元数转换为欧拉角
+    tf::Matrix3x3 m(q);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+
+    // 取pitch和yaw的反值
+    pitch = -pitch;
+    yaw = -yaw;
+
+    // 将修改后的欧拉角转换回四元数
+    tf::Quaternion q_new = tf::createQuaternionFromRPY(roll, pitch, yaw);
+
+    // 更新out对象的方向
+    out.pose.orientation.x = q_new.x();
+    out.pose.orientation.y = q_new.y();
+    out.pose.orientation.z = q_new.z();
+    out.pose.orientation.w = q_new.w();
+
 }
 
 void LaserMapping::PointBodyToWorld(const PointType *pi, PointType *const po) {
@@ -823,8 +864,8 @@ void LaserMapping::PointBodyToWorld(const PointType *pi, PointType *const po) {
                          state_point_.pos);
 
     po->x = p_global(0);
-    po->y = p_global(1);
-    po->z = p_global(2);
+    po->y = -p_global(1);
+    po->z = -p_global(2);
     po->intensity = pi->intensity;
 }
 
