@@ -412,6 +412,7 @@ void LaserMapping::LivoxPCLCallBack(const livox_ros_driver::CustomMsg::ConstPtr 
     mtx_buffer_.unlock();
 }
 
+// TODO:
 void LaserMapping::IMUCallBack(const sensor_msgs::Imu::ConstPtr &msg_in) {
     publish_count_++;
 
@@ -824,6 +825,7 @@ void LaserMapping::Savetrajectory(const std::string &traj_file) {
     ofs.close();
 }
 
+// TODO:
 ///////////////////////////  private method /////////////////////////////////////////////////////////////////////
 template <typename T>
 void LaserMapping::SetPosestamp(T &out) {
@@ -844,6 +846,7 @@ void LaserMapping::SetPosestamp(T &out) {
     m.getRPY(roll, pitch, yaw);
 
     // 取pitch和yaw的反值
+    roll = roll;
     pitch = -pitch;
     yaw = -yaw;
 
@@ -858,14 +861,15 @@ void LaserMapping::SetPosestamp(T &out) {
 
 }
 
+// TODO:
 void LaserMapping::PointBodyToWorld(const PointType *pi, PointType *const po) {
     common::V3D p_body(pi->x, pi->y, pi->z);
     common::V3D p_global(state_point_.rot * (state_point_.offset_R_L_I * p_body + state_point_.offset_T_L_I) +
                          state_point_.pos);
 
     po->x = p_global(0);
-    po->y = -p_global(1);
-    po->z = -p_global(2);
+    po->y = p_global(1);
+    po->z = p_global(2);
     po->intensity = pi->intensity;
 }
 
