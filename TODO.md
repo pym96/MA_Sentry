@@ -101,10 +101,29 @@ public:
 
 #endif 
 
+```
+
+
 
 
 ```
-
+<root>
+    <BehaviorTree>
+        <Sequence name="MainSequence">
+            <MoveToPosition target_position="{1.5, 0, 0}"/> <!-- 假设这里的位置是相对于地图的左侧1.5米 -->
+            <CheckHP/>
+            <Fallback name="CheckHealthFallback">
+                <Sequence name="LowHealthSequence">
+                    <CheckHP/>
+                    <MoveToPosition target_position="{0, 2.0, -2.0}"/> <!-- 移动到安全位置 -->
+                    <Wait duration="5"/> <!-- 等待5秒 -->
+                    <MoveToPosition target_position="{1.5, 0, 0}"/> <!-- 返回到初始位置 -->
+                </Sequence>
+                <AlwaysRunning/> <!-- 如果血量不低，保持当前状态 -->
+            </Fallback>
+        </Sequence>
+    </BehaviorTree>
+</root>
 
 
 
