@@ -1,3 +1,4 @@
+```
 class MoveToPosition : public BT::SyncActionNode
 {
 public:
@@ -72,3 +73,5 @@ int main(int argc, char** argv) {
 
     return 0;
 }
+
+```
