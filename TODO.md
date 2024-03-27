@@ -67,8 +67,6 @@ public:
 
 };
 
-
-// Wait 实现
 class Wait : public BT::SyncActionNode
 {
 public:
@@ -76,14 +74,34 @@ public:
         : BT::SyncActionNode(name, config) {}
 
     BT::NodeStatus tick() override {
-        ros::Duration(5).sleep(); // 等待5秒
+        int duration;
+        // 获取 duration 输入
+        getInput("duration", duration);
+        ros::Duration(duration).sleep(); // 根据 duration 等待
         return BT::NodeStatus::SUCCESS;
     }
 
     static BT::PortsList providedPorts() {
-        return {};
+        // 声明 duration 端口
+        return { BT::InputPort<int>("duration") };
     }
 };
+
+class AlwaysRunning : public BT::SyncActionNode
+{
+public:
+    AlwaysRunning(const std::string& name, const BT::NodeConfiguration& config)
+        : BT::SyncActionNode(name, config) {}
+
+    BT::NodeStatus tick() override {
+        return BT::NodeStatus::RUNNING; // 始终返回 RUNNING
+    }
+
+    static BT::PortsList providedPorts() {
+        return {}; // 没有输入或输出端口
+    }
+};
+
 
 
 #include "ros/ros.h"
@@ -111,6 +129,8 @@ int main(int argc, char** argv) {
     factory.registerNodeType<MoveToPosition>("MoveToPosition");
     factory.registerNodeType<CheckHP>("CheckHP");
     factory.registerNodeType<Wait>("Wait");
+    factory.registerNodeType<AlwaysRunning>("AlwaysRunning");
+
 
     // 创建行为树
     auto tree = factory.createTreeFromFile("/home/dan/learn/MA_Sentry/src/rm_control/rm_decision/config/final_tree.xml");
