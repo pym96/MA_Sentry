@@ -38,18 +38,17 @@ void LaserMapping::SetPosestamp(T &out) {
     out.pose.orientation.w = q_new.w();
 }
 
-
 ```
 
-
 ```
+#ifndef __PRE_GOAL_HPP__
+#define __PRE_GOAL_HPP__
+
 #include <behaviortree_cpp_v3/behavior_tree.h>
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Point.h>
 #include <std_msgs/Int32.h>
-
-// 全局ROS发布器
-ros::Publisher vel_pub;
 
 // MoveToPosition 实现
 class MoveToPosition : public BT::SyncActionNode
@@ -62,7 +61,6 @@ public:
         // 实现移动逻辑，这里作为示例
         geometry_msgs::Twist cmd_vel;
         cmd_vel.linear.x = 1.0; // 示例值
-        vel_pub.publish(cmd_vel);
         return BT::NodeStatus::SUCCESS;
     }
 
@@ -72,17 +70,19 @@ public:
 };
 
 // CheckHP 实现
-int current_hp = 1000; // 假设的血量值
-
 class CheckHP : public BT::ConditionNode
 {
-public:
-    CheckHP(const std::string& name, const BT::NodeConfiguration& config)
-        : BT::ConditionNode(name, config) {}
+    public:
+        CheckHP(const std::string& name, const BT::NodeConfiguration& config)
+            : BT::ConditionNode(name, config) {}
 
-    BT::NodeStatus tick() override {
-        return current_hp < 400 ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE;
-    }
+        BT::NodeStatus tick() override {
+            return current_hp < 400 ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE;
+        }
+
+    private:
+        int current_hp = 1000; // 假设的血量值
+
 };
 
 // Wait 实现
@@ -99,33 +99,12 @@ public:
 };
 
 
-```
+#endif 
+
+
 
 ```
-int main(int argc, char** argv) {
-    ros::init(argc, argv, "bt_navigator");
-    ros::NodeHandle nh;
 
-    vel_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
-
-    // 定义行为树
-    BT::BehaviorTreeFactory factory;
-    factory.registerNodeType<MoveToPosition>("MoveToPosition");
-    factory.registerNodeType<CheckHP>("CheckHP");
-    factory.registerNodeType<Wait>("Wait");
-
-    // 构建行为树
-    auto tree = factory.createTreeFromFile("/path/to/your_tree.xml");
-
-    // 运行行为树
-    BT::NodeStatus status;
-    do {
-        status = tree.tickRoot();
-        ros::spinOnce();
-    } while (status == BT::NodeStatus::RUNNING);
-
-    return 0;
-}
 
 
 
