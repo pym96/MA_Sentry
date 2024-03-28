@@ -46,7 +46,7 @@ void cmd_velCallBack(const geometry_msgs::TwistStamped::ConstPtr& msg) {
 
 void nav_callBack(const std_msgs::Int8::ConstPtr& msg) {
     navigating.data = msg->data;
-    ROS_INFO("Current state is: %d", navigating.data);
+    // ROS_INFO("Current state is: %d", navigating.data);
 }
 
 void receiveData() {

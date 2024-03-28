@@ -27,7 +27,7 @@ struct SendPacket{
 */
 struct ReceivePacket{
    uint8_t head = 0x5A;
-   uint8_t sentry_hp;
+   uint16_t sentry_hp;
    uint16_t checksum = 0;
 }__attribute__((packed));
 

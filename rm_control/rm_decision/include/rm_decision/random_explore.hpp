@@ -24,14 +24,18 @@ private:
     ros::NodeHandle nh_;
     ros::Publisher way_point_pub_;
     ros::Subscriber stop_sub_;    // 订阅停止信号
-    ros::Subscriber odom_sub_;    // 订阅里程计信息
+    ros::Subscriber goal_point_sub_;    // 订阅way_point信息
+    ros::Subscriber odom_sub_;
 
     bool goal_reached_;  // 目标是否已达到的标志
     bool initial_position_set;  // 初始位置是否已设置的标志
     geometry_msgs::Point initial_position;  // 存储初始位置
+    geometry_msgs::Point fixed_point_;
 
     void stop_callback(const std_msgs::Int8::ConstPtr& msg);  // 处理停止信号的回调函数
-    void odom_callback(const nav_msgs::Odometry::ConstPtr& msg);  // 处理里程计信息的回调函数
+    void goalpoint_callback(const geometry_msgs::PointStamped::ConstPtr& msg);  // 处理里程计信息的回调函数
+    void odom_callback(const nav_msgs::Odometry::ConstPtr& msg);
+
 };
 
 #endif // __RANDOM_EXPLORE_HPP

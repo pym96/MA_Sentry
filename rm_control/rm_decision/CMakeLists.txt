@@ -44,9 +44,13 @@ include
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_test_node src/random_radius_explore.cc src/patrol.cc src/random_explore.cc)
+add_executable(${PROJECT_NAME}_final_node src/final_decision.cc)
 # add_dependencies(${PROJECT_NAME}_test_node ${catkin_LIBRARIES})
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_test_node
   ${catkin_LIBRARIES}  
 )
 
+target_link_libraries(${PROJECT_NAME}_final_node 
+  ${catkin_LIBRARIES}  
+)
