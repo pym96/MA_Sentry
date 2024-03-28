@@ -26,7 +26,8 @@ public:
         // Convert ROS message to PCL point cloud
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromROSMsg(*cloud_msg, *cloud);
-
+        
+        
         // Create a new point cloud for the filtered results
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
 
@@ -59,9 +60,6 @@ public:
         // Publish the filtered point cloud
         pub.publish(output);
     }
-
-
-
 
 private:
     ros::Subscriber sub;
