@@ -16,30 +16,30 @@ public:
             way_point_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/way_point", 10);
         }
 
-    BT::NodeStatus tick() override {
-        geometry_msgs::PointStamped target_position;
-        float target_x;
-        float target_y;
-        float target_z;
-        if (!getInput<float>("target_x", target_x) && 
-            !getInput<float>("target_x", target_y) &&
-            !getInput<float>("target_x", target_z)) {
-            ROS_ERROR("Missing target_position input");
-            return BT::NodeStatus::FAILURE;
-        }
-
-        target_position.header.stamp = ros::Time::now();
-        target_position.header.frame_id = "map";
-        target_position.point.x = target_x;
-        target_position.point.y = target_y;
-        target_position.point.z = target_z;
-
-        ROS_INFO("Target_x: %f, target_y: %f, target_z: %f", target_x,target_y, target_z);
-        
-        way_point_pub_.publish(target_position);
-            
-        return BT::NodeStatus::SUCCESS;
+BT::NodeStatus tick() override {
+    geometry_msgs::PointStamped target_position;
+    float target_x;
+    float target_y;
+    float target_z;
+    if (!getInput<float>("target_x", target_x) || 
+        !getInput<float>("target_y", target_y) ||
+        !getInput<float>("target_z", target_z)) {
+        ROS_ERROR("Missing target_position input");
+        return BT::NodeStatus::FAILURE;
     }
+
+    target_position.header.stamp = ros::Time::now();
+    target_position.header.frame_id = "map";
+    target_position.point.x = target_x;
+    target_position.point.y = target_y;
+    target_position.point.z = target_z;
+
+    ROS_INFO("Moving to target position - X: %f, Y: %f, Z: %f", target_x, target_y, target_z);
+    
+    way_point_pub_.publish(target_position);
+        
+    return BT::NodeStatus::SUCCESS;
+}
 
     static BT::PortsList providedPorts() {
         return { BT::InputPort<float>("target_x"),
