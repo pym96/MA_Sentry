@@ -29,10 +29,12 @@ public:
         }
 
         target_position.header.stamp = ros::Time::now();
-        target_position.header.frame_id = "vehicle";
+        target_position.header.frame_id = "map";
         target_position.point.x = target_x;
         target_position.point.y = target_y;
         target_position.point.z = target_z;
+
+        ROS_INFO("Target_x: %f, target_y: %f, target_z: %f", target_x,target_y, target_z);
         
         way_point_pub_.publish(target_position);
             
