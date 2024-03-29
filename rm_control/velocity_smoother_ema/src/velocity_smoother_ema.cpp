@@ -10,7 +10,7 @@ VelocitySmootherEma::VelocitySmootherEma(ros::NodeHandle* nh):nh_(*nh)
     nh_.param<int>("/stop_counter", stop_counter, 3);
 
     velocity_sub_ = nh_.subscribe(raw_cmd_topic, 10, &VelocitySmootherEma::twist_callback, this);
-    velocity_pub_ = nh_.advertise<geometry_msgs::Twist>(cmd_topic, 10, true);
+    velocity_pub_ = nh_.advertise<geometry_msgs::TwistStamped>(cmd_topic, 10, true);
     timer = nh_.createTimer(ros::Duration(1.0 / cmd_rate), &VelocitySmootherEma::update, this);
 
     previous_x_vel = 0.0;
@@ -29,7 +29,7 @@ VelocitySmootherEma::~VelocitySmootherEma()
     ros::shutdown();
 }
 
-void VelocitySmootherEma::twist_callback(const geometry_msgs::Twist::ConstPtr msg)
+void VelocitySmootherEma::twist_callback(const geometry_msgs::TwistStamped::ConstPtr msg)
 {
     // ROS_INFO("I RECEIVED A NEW MESSAGE");
     cmd_vel_msg_ = *msg;
@@ -41,23 +41,25 @@ void VelocitySmootherEma::update(const ros::TimerEvent&)
     if (stop_counter-- <= 0)
     {
         stop_counter = 0;
-        cmd_vel_msg_.linear.x = 0.0;
-        cmd_vel_msg_.linear.y = 0.0;
-        cmd_vel_msg_.angular.z = 0.0;
+        cmd_vel_msg_.twist.linear.x = 0.0;
+        cmd_vel_msg_.twist.linear.y = 0.0;
+        cmd_vel_msg_.twist.angular.z = 0.0;
         // ROS_INFO("THE CMD IS ZERO");
     }
     // ROS_INFO("THE CMD IS : %d", stop_counter);
-    x_vel = cmd_vel_msg_.linear.x;
-    y_vel = cmd_vel_msg_.linear.y;
-    w_vel = cmd_vel_msg_.angular.z;
+    y_vel = cmd_vel_msg_.twist.linear.y;
+    w_vel = cmd_vel_msg_.twist.angular.z;
+    x_vel = cmd_vel_msg_.twist.linear.x;
 
     smoothed_x_vel = alpha_v * x_vel + (1 - alpha_v) * previous_x_vel;
     smoothed_y_vel = alpha_v * y_vel + (1 - alpha_v) * previous_y_vel;
     smoothed_w_vel = alpha_w * w_vel + (1 - alpha_w) * previous_w_vel;
 
-    cmd_vel_msg_.linear.x = smoothed_x_vel;
-    cmd_vel_msg_.linear.y = smoothed_y_vel;
-    cmd_vel_msg_.angular.z = smoothed_w_vel;
+    cmd_vel_msg_.twist.linear.x = smoothed_x_vel;
+    cmd_vel_msg_.twist.linear.y = smoothed_y_vel;
+    cmd_vel_msg_.twist.angular.z = smoothed_w_vel;
+
+    ROS_INFO("Current v_x: %f, v_y: %f, a_z: %f", smoothed_x_vel, smoothed_y_vel, smoothed_w_vel);
 
     previous_x_vel = smoothed_x_vel;
     previous_y_vel = smoothed_y_vel;
