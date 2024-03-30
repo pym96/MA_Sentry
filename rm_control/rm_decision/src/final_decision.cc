@@ -9,28 +9,27 @@
 #include <behaviortree_cpp_v3/behavior_tree.h>
 #include <behaviortree_cpp_v3/bt_factory.h>
 
-#include "rm_decision/final_decision.hpp"
+#include "rm_decision/final_decision.hpp" // Make sure this includes the CheckReached node definition
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "behavior_tree_robot");
     ros::NodeHandle nh;
 
-    // 订阅 /current_hp 以更新血量
-
     BT::BehaviorTreeFactory factory;
 
-    // 注册自定义节点
+    // Register custom nodes
     factory.registerNodeType<MoveToPosition>("MoveToPosition");
     factory.registerNodeType<CheckHP>("CheckHP");
     factory.registerNodeType<Wait>("Wait");
     factory.registerNodeType<AlwaysRunning>("AlwaysRunning");
+    factory.registerNodeType<CheckReached>("CheckReached"); // Register the new custom node
 
-    // 创建行为树
+    // Create the behavior tree from the XML configuration file
     auto tree = factory.createTreeFromFile("/home/dan/learn/MA_Sentry/src/rm_control/rm_decision/config/final_tree.xml");
 
     ros::Rate rate(10);
     while (ros::ok()) {
-        // 运行行为树
+        // Tick the root of the behavior tree
         tree.tickRoot();
 
         ros::spinOnce();
@@ -39,4 +38,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-
