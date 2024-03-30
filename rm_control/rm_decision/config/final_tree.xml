@@ -1,8 +1,10 @@
 <root>
     <BehaviorTree>
         <Sequence name="MainSequence">
-            <MoveToPosition target_x="0.0" target_y="2.0" target_z="0"/>
-            <CheckReached/> <!-- Check if reached the target -->
+            <MoveToPosition target_x="9.0" target_y="6.0" target_z="0"/>
+            <CheckReachedAndStop target_x="9.0" target_y="6.0" target_z="0"/> <!-- Check if reached the target -->
+            <MoveToPosition target_x="6.0" target_y="3.0" target_z="0"/>
+            <CheckReachedAndStop target_x="6.0" target_y="3.0" target_z="0"/> <!-- Check if reached the target -->
             <CheckHP/>
             <Fallback name="CheckHealthFallback">
                 <Sequence name="LowHealthSequence">
