@@ -8,6 +8,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <std_msgs/Int32.h>
 #include <std_msgs/UInt16.h>
+#include <std_msgs/Int8.h>
 
 class MoveToPosition : public BT::SyncActionNode
 {
@@ -159,7 +160,7 @@ public:
         }
 
         // Target not reached yet, or no target set
-        return BT::NodeStatus::RUNNING;
+        return BT::NodeStatus::FAILURE;
     }
 
     static BT::PortsList providedPorts() {
