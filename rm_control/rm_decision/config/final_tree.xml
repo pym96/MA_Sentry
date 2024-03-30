@@ -1,18 +1,18 @@
 <root>
     <BehaviorTree>
         <Sequence name="MainSequence">
-            <MoveToPosition target_x="0.0" target_y = "2.0" target_z="0"/> <!-- 假设这里的位置是相对于地图的左侧1.5米 -->
+            <MoveToPosition target_x="0.0" target_y="2.0" target_z="0"/>
+            <CheckReached/> <!-- Check if reached the target -->
             <CheckHP/>
             <Fallback name="CheckHealthFallback">
                 <Sequence name="LowHealthSequence">
                     <CheckHP/>
-                    <MoveToPosition target_x="0.0" target_y = "2.0" target_z="-2.0"/> <!-- 移动到安全位置 -->
-                    <Wait duration="5"/> <!-- 等待5秒 -->
-                    <MoveToPosition target_x="1.5" target_y = "0.0" target_z="0"/> <!-- 返回到初始位置 -->
+                    <MoveToPosition target_x="0.0" target_y="2.0" target_z="-2.0"/>
+                    <Wait duration="5"/>
+                    <MoveToPosition target_x="1.5" target_y="0.0" target_z="0"/>
                 </Sequence>
                 <AlwaysRunning/> 
             </Fallback>
         </Sequence>
     </BehaviorTree>
 </root>
-
