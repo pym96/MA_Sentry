@@ -120,5 +120,60 @@ static BT::PortsList providedPorts() {
 
 };
 
+class CheckReached : public BT::ConditionNode
+{
+public:
+    CheckReached(const std::string& name, const BT::NodeConfiguration& config)
+        : BT::ConditionNode(name, config), has_reached(true) // assuming it starts as reached
+    {
+        goal_sub_ = nh_.subscribe<geometry_msgs::PointStamped>("/way_point", 5, &CheckReached::goal_handler, this);
+        odom_sub_ = nh_.subscribe<nav_msgs::Odometry>("/state_estimation", 5, &CheckReached::odom_handler, this);
+    }
+
+    BT::NodeStatus tick() override
+    {
+        if (has_reached) {
+            return BT::NodeStatus::SUCCESS;
+        } else {
+            return BT::NodeStatus::FAILURE;
+        }
+    }
+
+    static BT::PortsList providedPorts() {
+        return {};
+    }
+
+private:
+    bool has_reached;
+    double goal_x, goal_y, goal_z;
+    double curr_x, curr_y, curr_z;
+    ros::NodeHandle nh_;
+    ros::Subscriber goal_sub_, odom_sub_;
+
+    void goal_handler(const geometry_msgs::PointStamped::ConstPtr& msg)
+    {
+        goal_x = msg->point.x;
+        goal_y = msg->point.y;
+        goal_z = msg->point.z;
+        has_reached = false; // Reset on new goal
+    }
+
+    void odom_handler(const nav_msgs::Odometry::ConstPtr& odom)
+    {
+        curr_x = odom->pose.pose.position.x;
+        curr_y = odom->pose.pose.position.y;
+        curr_z = odom->pose.pose.position.z;
+
+        double disX = curr_x - goal_x;
+        double disY = curr_y - goal_y;
+        double dis = sqrt(disX * disX + disY * disY);
+
+        if (dis < 0.52) { // Threshold for reaching the goal
+            has_reached = true;
+        }
+    }
+};
+
+
 
 #endif 
