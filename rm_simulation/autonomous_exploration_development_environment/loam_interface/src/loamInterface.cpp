@@ -97,7 +97,7 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudIn)
       // laserCloud->points[i].z = laserCloud->points[i].y;
       // laserCloud->points[i].y = temp;
       laserCloud->points[i].x = laserCloud->points[i].x;
-      laserCloud->points[i].y = laserCloud->points[i].y;
+      laserCloud->points[i].y = -laserCloud->points[i].y;
       laserCloud->points[i].z = -laserCloud->points[i].z;
     }
   }
