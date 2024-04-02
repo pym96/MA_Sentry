@@ -2,6 +2,9 @@
 
 https://github.com/pym96/MA_Sentry/assets/105438207/54a1b719-e381-4962-ab62-0fa8ce5e9e83
 
+![image](https://github.com/pym96/MA_Sentry/assets/105438207/6373742c-4ca8-4d8a-8e34-64be34388b41)
+
+
 ## config
 ```
 sudo apt update
