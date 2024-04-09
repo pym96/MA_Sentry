@@ -18,11 +18,10 @@ int main(int argc, char** argv) {
     BT::BehaviorTreeFactory factory;
 
     // Register custom nodes
-    factory.registerNodeType<MoveToPosition>("MoveToPosition");
+    factory.registerNodeType<MoveAndCheckPosition>("MoveAndCheckPosition");
     factory.registerNodeType<CheckHP>("CheckHP");
     factory.registerNodeType<Wait>("Wait");
     factory.registerNodeType<AlwaysRunning>("AlwaysRunning");
-    factory.registerNodeType<CheckReached>("CheckReached"); // Register the new custom node
 
     // Create the behavior tree from the XML configuration file
     auto tree = factory.createTreeFromFile("/home/dan/learn/MA_Sentry/src/rm_control/rm_decision/config/final_tree.xml");

@@ -10,50 +10,84 @@
 #include <std_msgs/UInt16.h>
 #include <std_msgs/Int8.h>
 
-class MoveToPosition : public BT::SyncActionNode
+
+class MoveAndCheckPosition : public BT::SyncActionNode
 {
 public:
-    MoveToPosition(const std::string& name, const BT::NodeConfiguration& config)
-        : BT::SyncActionNode(name, config) {
-            way_point_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/way_point", 10);
-        }
-
-BT::NodeStatus tick() override {
-    geometry_msgs::PointStamped target_position;
-    float target_x;
-    float target_y;
-    float target_z;
-    if (!getInput<float>("target_x", target_x) || 
-        !getInput<float>("target_y", target_y) ||
-        !getInput<float>("target_z", target_z)) {
-        ROS_ERROR("Missing target_position input");
-        return BT::NodeStatus::FAILURE;
+    MoveAndCheckPosition(const std::string& name, const BT::NodeConfiguration& config)
+        : BT::SyncActionNode(name, config), has_reached_(false), nh_("~")
+    {
+        way_point_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/way_point", 10);
+        stop_sub_ = nh_.subscribe("/stop", 10, &MoveAndCheckPosition::stopCallback, this);
     }
 
-    target_position.header.stamp = ros::Time::now();
-    target_position.header.frame_id = "map";
-    target_position.point.x = target_x;
-    target_position.point.y = target_y;
-    target_position.point.z = target_z;
+    BT::NodeStatus tick() override {
+        if (!has_reached_) {
+            geometry_msgs::PointStamped target_position;
+            float target_x, target_y, target_z;
 
-    ROS_INFO("Moving to target position - X: %f, Y: %f, Z: %f", target_x, target_y, target_z);
-    
-    way_point_pub_.publish(target_position);
-        
-    return BT::NodeStatus::SUCCESS;
-}
+            if (!getInput<float>("target_x", target_x) || 
+                !getInput<float>("target_y", target_y) ||
+                !getInput<float>("target_z", target_z)) {
+                ROS_ERROR("MoveAndCheckPosition: Missing target_position input");
+                return BT::NodeStatus::FAILURE;
+            }
+
+            ROS_INFO("Current position x:%f, y:%f", target_x, target_y);
+            target_position.header.stamp = ros::Time::now();
+            target_position.header.frame_id = "map";
+            target_position.point.x = target_x;
+            target_position.point.y = target_y;
+            target_position.point.z = target_z;
+
+            way_point_pub_.publish(target_position);
+
+            // Wait for the stop signal or timeout
+            ros::Time start_time = ros::Time::now();
+            ros::Rate rate(100); // 100 Hz
+            const double timeout = 10.0; // Timeout after 10 seconds
+
+            while (ros::ok()) {
+                ros::spinOnce();
+                double elapsed = (ros::Time::now() - start_time).toSec();
+
+                if (has_reached_) {
+                    ROS_INFO("MoveAndCheckPosition: Target reached.");
+                    return BT::NodeStatus::SUCCESS;
+                }
+
+                if (elapsed > timeout) {
+                    ROS_ERROR("MoveAndCheckPosition: Timeout waiting for stop signal.");
+                    return BT::NodeStatus::SUCCESS;
+                }
+
+                rate.sleep();
+            }
+        }
+        // Reset for next tick call
+        has_reached_ = false;
+        return BT::NodeStatus::SUCCESS;
+    }
 
     static BT::PortsList providedPorts() {
-        return { BT::InputPort<float>("target_x"),
-                 BT::InputPort<float>("target_y"),
-                 BT::InputPort<float>("target_z")};
+        return {BT::InputPort<float>("target_x"),
+                BT::InputPort<float>("target_y"),
+                BT::InputPort<float>("target_z")};
     }
 
 private:
-    ros::Publisher way_point_pub_;
     ros::NodeHandle nh_;
+    ros::Publisher way_point_pub_;
+    ros::Subscriber stop_sub_;
+    bool has_reached_;
 
-
+    void stopCallback(const std_msgs::Int8::ConstPtr& msg) {
+        if (msg->data == 1) {
+            has_reached_ = true;
+        } else {
+            has_reached_ = false;
+        }
+    }
 };
 
 class CheckHP : public BT::ConditionNode
@@ -122,73 +156,4 @@ static BT::PortsList providedPorts() {
 };
 
 
-class CheckReachedAndStop : public BT::SyncActionNode
-{
-public:
-    CheckReachedAndStop(const std::string& name, const BT::NodeConfiguration& config)
-        : BT::SyncActionNode(name, config), nh_("~"), has_reached_(true)
-    {
-        stop_pub_ = nh_.advertise<std_msgs::Int8>("/stop", 10);
-        odom_sub_ = nh_.subscribe("/state_estimation", 5, &CheckReachedAndStop::odomHandler, this);
-        // Not subscribing to a target here; assuming target is passed via BT blackboard
-    }
-
-    BT::NodeStatus tick() override
-    {
-        double target_x, target_y, target_z;
-        // Getting inputs
-        if (!getInput<double>("target_x", target_x) ||
-            !getInput<double>("target_y", target_y) ||
-            !getInput<double>("target_z", target_z))
-        {
-            ROS_ERROR("CheckReachedAndStop: Missing required input [target_x, target_y, target_z]");
-            return BT::NodeStatus::FAILURE;
-        }
-
-        // Check if reached
-        if (!has_reached_) {
-            double disX = curr_x_ - target_x;
-            double disY = curr_y_ - target_y;
-            double dis = sqrt(disX * disX + disY * disY);
-
-            if (dis < waypoint_xy_radius_) {
-                ROS_INFO("CheckReachedAndStop: Target reached.");
-                has_reached_ = true;
-                publishStopSignal();
-                return BT::NodeStatus::SUCCESS;
-            }
-        }
-
-        // Target not reached yet, or no target set
-        return BT::NodeStatus::FAILURE;
-    }
-
-    static BT::PortsList providedPorts() {
-        return {BT::InputPort<double>("target_x"),
-                BT::InputPort<double>("target_y"),
-                BT::InputPort<double>("target_z")};
-    }
-
-private:
-    ros::NodeHandle nh_;
-    ros::Publisher stop_pub_;
-    ros::Subscriber odom_sub_;
-    double curr_x_ = 0.0, curr_y_ = 0.0, curr_z_ = 0.0;
-    bool has_reached_;
-    const double waypoint_xy_radius_ = 0.52;
-
-    void odomHandler(const nav_msgs::Odometry::ConstPtr& msg) {
-        curr_x_ = msg->pose.pose.position.x;
-        curr_y_ = msg->pose.pose.position.y;
-        curr_z_ = msg->pose.pose.position.z;
-        has_reached_ = false; // Reset reached status on new odom message
-    }
-
-    void publishStopSignal() {
-        std_msgs::Int8 reached_msg;
-        reached_msg.data = 1; // Indicate stop
-        stop_pub_.publish(reached_msg);
-    }
-};
-
-#endif 
+#endif
