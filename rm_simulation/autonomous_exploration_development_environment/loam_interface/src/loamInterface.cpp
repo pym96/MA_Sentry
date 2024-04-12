@@ -22,6 +22,10 @@
 #include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/common/geometry.h>
+
+#include <omp.h> // Ensure your compilation environment supports OpenMP
+
 
 using namespace std;
 
@@ -33,6 +37,8 @@ bool flipStateEstimation = true;
 bool flipRegisteredScan = true;
 bool sendTF = true;
 bool reverseTF = false;
+
+double radius_;
 
 pcl::PointCloud<pcl::PointXYZI>::Ptr laserCloud(new pcl::PointCloud<pcl::PointXYZI>());
 
@@ -86,29 +92,48 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& odom)
 
 void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudIn)
 {
-  laserCloud->clear();
-  pcl::fromROSMsg(*laserCloudIn, *laserCloud);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr laserCloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::fromROSMsg(*laserCloudIn, *laserCloud);
 
-  if (flipRegisteredScan) {
-    int laserCloudSize = laserCloud->points.size();
-    for (int i = 0; i < laserCloudSize; i++) {
-      float temp = laserCloud->points[i].x;
-      // laserCloud->points[i].x = laserCloud->points[i].z;
-      // laserCloud->points[i].z = laserCloud->points[i].y;
-      // laserCloud->points[i].y = temp;
-      laserCloud->points[i].x = laserCloud->points[i].x;
-      laserCloud->points[i].y = -laserCloud->points[i].y;
-      laserCloud->points[i].z = -laserCloud->points[i].z;
+    // 翻转点云逻辑保留
+    if (flipRegisteredScan) {
+        int laserCloudSize = laserCloud->points.size();
+        for (int i = 0; i < laserCloudSize; i++) {
+            laserCloud->points[i].x = laserCloud->points[i].x;
+            laserCloud->points[i].y = -laserCloud->points[i].y;
+            laserCloud->points[i].z = -laserCloud->points[i].z;
+        }
     }
-  }
 
-  // publish registered scan messages
-  sensor_msgs::PointCloud2 laserCloud2;
-  pcl::toROSMsg(*laserCloud, laserCloud2);
-  laserCloud2.header.stamp = laserCloudIn->header.stamp;
-  laserCloud2.header.frame_id = "map";
-  pubLaserCloudPointer->publish(laserCloud2);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointXYZ center; // 中心点设为原点，可以根据需要修改
+    center.x = 0.0;
+    center.y = 0.0;
+    center.z = 0.0;
+
+    #pragma omp parallel
+    {
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered_private(new pcl::PointCloud<pcl::PointXYZ>);
+
+        #pragma omp for nowait
+        for (size_t i = 0; i < laserCloud->size(); ++i) {
+            if (pcl::geometry::distance(laserCloud->points[i], center) >= radius_) {
+                cloud_filtered_private->push_back(laserCloud->points[i]);
+            }
+        }
+
+        #pragma omp critical
+        *cloud_filtered += *cloud_filtered_private;
+    }
+
+    sensor_msgs::PointCloud2 output;
+    pcl::toROSMsg(*cloud_filtered, output);
+    output.header.frame_id = "sensor";
+    output.header.stamp = laserCloudIn->header.stamp;
+
+    pubLaserCloudPointer->publish(output);
 }
+
 
 int main(int argc, char** argv)
 {
@@ -122,6 +147,7 @@ int main(int argc, char** argv)
   nhPrivate.getParam("flipRegisteredScan", flipRegisteredScan);
   nhPrivate.getParam("sendTF", sendTF);
   nhPrivate.getParam("reverseTF", reverseTF);
+  nhPrivate.getParam("/ma_cloud_filter/radius", radius_);
 
   ros::Subscriber subOdometry = nh.subscribe<nav_msgs::Odometry> (stateEstimationTopic, 5, odometryHandler);
 
