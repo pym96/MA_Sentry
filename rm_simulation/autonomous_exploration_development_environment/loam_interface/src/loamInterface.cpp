@@ -95,7 +95,6 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudIn)
     pcl::PointCloud<pcl::PointXYZ>::Ptr laserCloud(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromROSMsg(*laserCloudIn, *laserCloud);
 
-    // 翻转点云逻辑保留
     if (flipRegisteredScan) {
         int laserCloudSize = laserCloud->points.size();
         for (int i = 0; i < laserCloudSize; i++) {
@@ -106,10 +105,12 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudIn)
     }
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointXYZ center; // 中心点设为原点，可以根据需要修改
-    center.x = 0.0;
-    center.y = 0.0;
-    center.z = 0.0;
+
+    // 使用odomData更新中心点位置
+    pcl::PointXYZ center;
+    center.x = odomData.pose.pose.position.x;
+    center.y = odomData.pose.pose.position.y;
+    center.z = odomData.pose.pose.position.z;
 
     #pragma omp parallel
     {
@@ -128,11 +129,12 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudIn)
 
     sensor_msgs::PointCloud2 output;
     pcl::toROSMsg(*cloud_filtered, output);
-    output.header.frame_id = "sensor";
+    output.header.frame_id = "sensor"; // 确保这是正确的坐标系
     output.header.stamp = laserCloudIn->header.stamp;
 
     pubLaserCloudPointer->publish(output);
 }
+
 
 
 int main(int argc, char** argv)
