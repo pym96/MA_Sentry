@@ -64,7 +64,7 @@
     <param name="stopYawRateGain" type="double" value="7.5" />
     <param name="maxYawRate" type="double" value="90.0" />
     <param name="maxSpeed" value="$(arg maxSpeed)" />
-    <param name="maxAccel" type="double" value="0.3" />
+    <param name="maxAccel" type="double" value="0.7" />
     <param name="switchTimeThre" type="double" value="1.0" />
     <param name="dirDiffThre" type="double" value="0.1" />
     <param name="stopDisThre" type="double" value="0.2" />
