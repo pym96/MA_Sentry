@@ -8,8 +8,11 @@ VelocitySmootherEma::VelocitySmootherEma(ros::NodeHandle* nh):nh_(*nh)
     nh_.param<std::string>("/cmd_topic", cmd_topic, "cmd_vel");
     nh_.param<double>("/cmd_rate", cmd_rate, 30.0);
     nh_.param<int>("/stop_counter", stop_counter, 3);
+    nh_.param<double>("maxAccel", max_accel, 0.7);
+
 
     velocity_sub_ = nh_.subscribe(raw_cmd_topic, 10, &VelocitySmootherEma::twist_callback, this);
+    // velocity_pub_ = nh_.advertise<geometry_msgs::TwistStamped>(cmd_topic, 10, true);
     velocity_pub_ = nh_.advertise<geometry_msgs::TwistStamped>(cmd_topic, 10, true);
     timer = nh_.createTimer(ros::Duration(1.0 / cmd_rate), &VelocitySmootherEma::update, this);
 
@@ -22,6 +25,9 @@ VelocitySmootherEma::VelocitySmootherEma(ros::NodeHandle* nh):nh_(*nh)
     smoothed_x_vel = 0.0;
     smoothed_y_vel = 0.0;
     smoothed_w_vel = 0.0;
+
+    last_smoothed_x_vel = 0.0;
+    last_smoothed_y_vel = 0.0;
 }
 
 VelocitySmootherEma::~VelocitySmootherEma()
@@ -29,12 +35,12 @@ VelocitySmootherEma::~VelocitySmootherEma()
     ros::shutdown();
 }
 
-void VelocitySmootherEma::twist_callback(const geometry_msgs::TwistStamped::ConstPtr msg)
+void VelocitySmootherEma::twist_callback(const geometry_msgs::TwistStamped::ConstPtr& msg)
 {
-    // ROS_INFO("I RECEIVED A NEW MESSAGE");
     cmd_vel_msg_ = *msg;
     stop_counter = 10;
 }
+
 
 void VelocitySmootherEma::update(const ros::TimerEvent&)
 {
@@ -51,19 +57,32 @@ void VelocitySmootherEma::update(const ros::TimerEvent&)
     w_vel = cmd_vel_msg_.twist.angular.z;
     x_vel = cmd_vel_msg_.twist.linear.x;
 
-    smoothed_x_vel = alpha_v * x_vel + (1 - alpha_v) * previous_x_vel;
-    smoothed_y_vel = alpha_v * y_vel + (1 - alpha_v) * previous_y_vel;
-    smoothed_w_vel = alpha_w * w_vel + (1 - alpha_w) * previous_w_vel;
+    double temp_smoothed_x_vel = alpha_v * x_vel + (1 - alpha_v) * previous_x_vel;
+    double temp_smoothed_y_vel = alpha_v * y_vel + (1 - alpha_v) * previous_y_vel;
+    double temp_smoothed_w_vel = alpha_w * w_vel + (1 - alpha_w) * previous_w_vel;
+
+    double accel_x = (temp_smoothed_x_vel - last_smoothed_x_vel) / (1.0 / cmd_rate);
+    double accel_y = (temp_smoothed_y_vel - last_smoothed_y_vel) / (1.0 / cmd_rate);
+
+    double smoothed_accel_x = std::min(std::max(accel_x, -max_accel), max_accel);
+    double smoothed_accel_y = std::min(std::max(accel_y, -max_accel), max_accel);
+
+    smoothed_x_vel += smoothed_accel_x * (1.0 / cmd_rate);
+    smoothed_y_vel += smoothed_accel_y * (1.0 / cmd_rate);
 
     cmd_vel_msg_.twist.linear.x = smoothed_x_vel;
     cmd_vel_msg_.twist.linear.y = smoothed_y_vel;
-    cmd_vel_msg_.twist.angular.z = smoothed_w_vel;
+
 
     ROS_INFO("Current v_x: %f, v_y: %f, a_z: %f", smoothed_x_vel, smoothed_y_vel, smoothed_w_vel);
 
     previous_x_vel = smoothed_x_vel;
     previous_y_vel = smoothed_y_vel;
-    previous_w_vel = smoothed_w_vel;    
+    
+    last_smoothed_x_vel = smoothed_x_vel;
+    last_smoothed_y_vel = smoothed_y_vel;
+
+
 
     velocity_pub_.publish(cmd_vel_msg_);
     // ROS_INFO("PUBLISHING TWIST MESSAGE!");
