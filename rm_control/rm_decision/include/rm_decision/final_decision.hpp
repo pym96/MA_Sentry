@@ -9,20 +9,74 @@
 #include <std_msgs/Int32.h>
 #include <std_msgs/UInt16.h>
 #include <std_msgs/Int8.h>
+#include <nav_msgs/Odometry.h>
+
+#include <tf/transform_datatypes.h>
+#include <tf/transform_broadcaster.h>
+
+#include <vector>
+#include <random>
+
+namespace ma_decision{
+
+namespace utils{
+    bool in_patrol(const double& x, const double& y, const double& len, const double& width) {
+        if (-len < x && x < len && -width < y && y < width) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    double random_double(double min, double max) {
+        static std::default_random_engine e;
+        std::uniform_real_distribution<double> dist(min, max);
+        return dist(e);
+    }
+}
 
 
+namespace bt{
 class MoveAndCheckPosition : public BT::SyncActionNode
 {
 public:
     MoveAndCheckPosition(const std::string& name, const BT::NodeConfiguration& config)
         : BT::SyncActionNode(name, config), has_reached_(false), nh_("~")
-    {
+    {   
         way_point_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/way_point", 10);
         stop_sub_ = nh_.subscribe("/stop", 10, &MoveAndCheckPosition::stopCallback, this);
+        odom_sub_ = nh_.subscribe<nav_msgs::Odometry>("/state_estimation", 5, &MoveAndCheckPosition::odom_callback, this);
     }
 
     BT::NodeStatus tick() override {
-        if (!has_reached_) {
+        
+        // TODO: Getting current position and use in_patrol()
+        // if yes,  then random use and return FAILURE, publish random way point
+        // else, then do nothing.
+        if(utils::in_patrol(vehicleX, vehicleY, 4, 5)){
+            // Publishing random point. But how?
+            // Generate a random point within bounds (-1, 1) for x, and (-2, 2) for y
+            double randX = utils::random_double(-4.0, 4.0);
+            double randY = utils::random_double(-5.0, 5.0);
+
+            // Create and publish the random waypoint
+            geometry_msgs::PointStamped random_point;
+            random_point.header.stamp = ros::Time::now();
+            random_point.header.frame_id = "map"; // or any other relevant frame
+            random_point.point.x = randX;
+            random_point.point.y = randY;
+            ROS_INFO("Current random point is x:%f, y:%f", randX, randY);
+            
+            // if(!has_reached_){
+            //     return BT::NodeStatus::FAILURE;
+            // }
+
+            way_point_pub_.publish(random_point);
+
+
+            return BT::NodeStatus::FAILURE;
+        }
+        else if (!has_reached_) {
             geometry_msgs::PointStamped target_position;
             float target_x, target_y, target_z;
 
@@ -45,7 +99,7 @@ public:
             // Wait for the stop signal or timeout
             ros::Time start_time = ros::Time::now();
             ros::Rate rate(100); // 100 Hz
-            const double timeout = 10.0; // Timeout after 10 seconds
+            const double timeout = 20.0; // Timeout after 10 seconds
 
             while (ros::ok()) {
                 ros::spinOnce();
@@ -79,7 +133,11 @@ private:
     ros::NodeHandle nh_;
     ros::Publisher way_point_pub_;
     ros::Subscriber stop_sub_;
+    ros::Subscriber odom_sub_;
+    std::vector<std::pair<int, int>> partrol_point_;
     bool has_reached_;
+    double odomTime;
+    double vehicleX, vehicleY, vehicleZ;
 
     void stopCallback(const std_msgs::Int8::ConstPtr& msg) {
         if (msg->data == 1) {
@@ -87,6 +145,18 @@ private:
         } else {
             has_reached_ = false;
         }
+    }
+
+   void odom_callback(const nav_msgs::Odometry::ConstPtr& msg) {
+        odomTime = msg->header.stamp.toSec();
+
+        double roll, pitch, yaw;
+        geometry_msgs::Quaternion geoQuat = msg->pose.pose.orientation;
+        tf::Matrix3x3(tf::Quaternion(geoQuat.x, geoQuat.y, geoQuat.z, geoQuat.w)).getRPY(roll, pitch, yaw);
+
+        vehicleX = msg->pose.pose.position.x;
+        vehicleY = msg->pose.pose.position.y;
+        vehicleZ = msg->pose.pose.position.z;
     }
 };
 
@@ -127,7 +197,6 @@ private:
 
 
 class Wait : public BT::SyncActionNode { public: Wait(const std::string& name, const BT::NodeConfiguration& config) : BT::SyncActionNode(name, config) {}
-
 BT::NodeStatus tick() override {
     int duration;
     // 获取 duration 输入
@@ -154,6 +223,7 @@ static BT::PortsList providedPorts() {
 }
 
 };
-
+}
+}
 
 #endif
