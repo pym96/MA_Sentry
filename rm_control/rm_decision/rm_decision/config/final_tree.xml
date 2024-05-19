@@ -1,0 +1,12 @@
+<root>
+    <BehaviorTree>
+        <Sequence name="MainSequence">
+            <MoveAndCheckPosition target_x="7.7" target_y="5.1" target_z="0" is_last="false"/>
+            <MoveAndCheckPosition target_x="8.3" target_y="8.5" target_z="0" is_last="false"/>
+            <MoveAndCheckPosition target_x="9.2" target_y="5.5" target_z="0" is_last="true"/>
+            <last_do/>
+  
+            <!-- TODO: Add a tag for the last sign -->
+        </Sequence>
+    </BehaviorTree>
+</root>
