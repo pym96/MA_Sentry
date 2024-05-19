@@ -10,7 +10,6 @@ project(rm_decision)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   behaviortree_cpp_v3
-  actionlib_msgs
   sensor_msgs
   nav_msgs
   roscpp
@@ -30,7 +29,7 @@ set(CMAKE_CXX_STANDARD 17)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include
- CATKIN_DEPENDS geometry_msgs roscpp sensor_msgs nav_msgs tf behaviortree_cpp_v3 actionlib_msgs
+ CATKIN_DEPENDS geometry_msgs roscpp sensor_msgs nav_msgs tf behaviortree_cpp_v3
 )
 
 ## Specify additional locations of header files
@@ -46,7 +45,6 @@ include
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_test_node src/random_radius_explore.cc src/patrol.cc src/random_explore.cc)
 add_executable(${PROJECT_NAME}_final_node src/final_decision.cc)
-add_executable(${PROJECT_NAME}_finalmb_node src/final_decision_mb.cc)
 # add_dependencies(${PROJECT_NAME}_test_node ${catkin_LIBRARIES})
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_test_node
@@ -54,9 +52,5 @@ target_link_libraries(${PROJECT_NAME}_test_node
 )
 
 target_link_libraries(${PROJECT_NAME}_final_node 
-  ${catkin_LIBRARIES}  
-)
-
-target_link_libraries(${PROJECT_NAME}_finalmb_node 
   ${catkin_LIBRARIES}  
 )

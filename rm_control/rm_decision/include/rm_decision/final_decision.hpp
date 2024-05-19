@@ -53,11 +53,12 @@ public:
         // TODO: Getting current position and use in_patrol()
         // if yes,  then random use and return FAILURE, publish random way point
         // else, then do nothing.
-        if(utils::in_patrol(vehicleX, vehicleY, 4, 5)){
+    if(utils::in_patrol(vehicleX, vehicleY, 1 , 1)){
             // Publishing random point. But how?
             // Generate a random point within bounds (-1, 1) for x, and (-2, 2) for y
-            double randX = utils::random_double(-4.0, 4.0);
-            double randY = utils::random_double(-5.0, 5.0);
+            ros::Time start_time = ros::Time::now();
+            double randX = utils::random_double(-1.5, 1.5);
+            double randY = utils::random_double(-1.5, 1.5);
 
             // Create and publish the random waypoint
             geometry_msgs::PointStamped random_point;
@@ -72,6 +73,16 @@ public:
             // }
 
             way_point_pub_.publish(random_point);
+            
+            while(ros::ok()){
+                double elapsed = (ros::Time::now() - start_time).toSec();
+                
+                if (elapsed > 1.0) 
+                  break;
+                else   
+                    continue;
+
+            }
 
 
             return BT::NodeStatus::FAILURE;

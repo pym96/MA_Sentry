@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     factory.registerNodeType<ma_decision::bt::MoveAndCheckPosition>("MoveAndCheckPosition");
 
     // Create the behavior tree from the XML configuration file
-    auto tree = factory.createTreeFromFile("/home/dan/learn/MA_Sentry/src/rm_control/rm_decision/config/final_tree.xml");
+    auto tree = factory.createTreeFromFile("/home/ma/ma_ws/src/rm_control/rm_decision/config/final_tree.xml");
 
     ros::Rate rate(10);
     while (ros::ok()) {

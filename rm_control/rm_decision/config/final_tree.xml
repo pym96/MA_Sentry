@@ -1,7 +1,7 @@
 <root>
     <BehaviorTree>
         <Sequence name="MainSequence">
-            <MoveAndCheckPosition target_x="3.0" target_y="3.0" target_z="0"/>
+            <MoveAndCheckPosition target_x="0.0" target_y="0.0" target_z="0"/>
   
             <!-- TODO: Add a tag for the last sign -->
         </Sequence>
