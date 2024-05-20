@@ -16,8 +16,9 @@
 
 #include <vector>
 #include <random>
+#include <string>
 
-bool is_last;
+using namespace std;
 
 namespace ma_decision{
 
@@ -48,6 +49,7 @@ public:
         way_point_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/way_point", 10);
         stop_sub_ = nh_.subscribe("/stop", 10, &MoveAndCheckPosition::stopCallback, this);
         odom_sub_ = nh_.subscribe<nav_msgs::Odometry>("/state_estimation", 5, &MoveAndCheckPosition::odom_callback, this);
+        //hp_sub_ = nh_.subscribe("/sentry_hp", 5, &MoveAndCheckPosition::hp_callback, this);
     }
 
     BT::NodeStatus tick() override {
@@ -55,40 +57,16 @@ public:
         // TODO: Getting current position and use in_patrol()
         // if yes,  then random use and return FAILURE, publish random way point
         // else, then do nothing.
-        #if 0
-        if(utils::in_patrol(vehicleX, vehicleY, 4, 5)){
-            // Publishing random point. But how?
-            // Generate a random point within bounds (-1, 1) for x, and (-2, 2) for y
-            double randX = utils::random_double(-4.0, 5.0);
-            double randY = utils::random_double(-4.0, 5.0);
-
-            // Create and publish the random waypoint
-            geometry_msgs::PointStamped random_point;
-            random_point.header.stamp = ros::Time::now();
-            random_point.header.frame_id = "map"; // or any other relevant frame
-            random_point.point.x = randX;
-            random_point.point.y = randY;
-            ROS_INFO("Current random point is x:%f, y:%f", randX, randY);
-            
-            // if(!has_reached_){
-            //     return BT::NodeStatus::FAILURE;
-            // }
-
-            way_point_pub_.publish(random_point);
-
-
-            return BT::NodeStatus::FAILURE;
-        }
-        #endif
-        if (!has_reached_) {
+       
+        if (!has_reached_) 
+        {
             geometry_msgs::PointStamped target_position;
             float target_x, target_y, target_z ;
-            
 
             if (!getInput<float>("target_x", target_x) || 
                 !getInput<float>("target_y", target_y) ||
                 !getInput<float>("target_z", target_z) ||
-                !getInput<bool>("is_last", is_last)) {
+                !getInput<string>("action", action) ) {
                 ROS_ERROR("MoveAndCheckPosition: Missing target_position input");
                 return BT::NodeStatus::FAILURE;
             }
@@ -101,34 +79,65 @@ public:
             target_position.point.z = target_z;
 
             way_point_pub_.publish(target_position);
-/*
-            if(is_last)
-            {
-                return BT::NodeStatus::FAILURE;
-            }
-*/
+
             // Wait for the stop signal or timeout
             ros::Time start_time = ros::Time::now();
-            ros::Rate rate(100); // 100 Hz
-            const double timeout = 20.0; // Timeout after 10 seconds
+            ros::Rate rate(1); // 100 Hz
+            const double timeout = 10.0; // Timeout after 10 seconds
 
-            while (ros::ok()) {
-                ros::spinOnce();
+            while (ros::ok()) 
+            {
                 double elapsed = (ros::Time::now() - start_time).toSec();
+                ros::spinOnce();
 
-                if (has_reached_) {
-                    ROS_INFO("MoveAndCheckPosition: Target reached.");
-                    return BT::NodeStatus::SUCCESS;
+                if (checkPosition(vehicleX, vehicleY, target_x, target_y)) 
+                {
+                    center_x = target_x;
+                    center_y = target_y;
+                    has_reached_ = true; 
                 }
 
-                if (elapsed > timeout) {
+                if (has_reached_) 
+                {
+                    ROS_INFO("MoveAndCheckPosition: Target reached.");
+                    if(action == "patrol")
+                    {
+                        double randX = utils::random_double(center_x - 3 , center_x + 3);
+                        double randY = utils::random_double(center_y - 3 , center_y + 3);
+
+                        geometry_msgs::PointStamped random_point;
+                        random_point.header.stamp = ros::Time::now();
+                        random_point.header.frame_id = "map"; // or any other relevant frame
+                        random_point.point.x = randX;
+                        random_point.point.y = randY;
+                        ROS_INFO("Current random point is x:%f, y:%f", randX, randY);
+
+                        way_point_pub_.publish(random_point);
+
+                    }
+                    else if(action == "fight")
+                    {
+                        ROS_INFO("FIGHT!!!----1 min!!!.");
+                        ros::Duration(10).sleep(); 
+                        has_reached_ = false;
+                        return BT::NodeStatus::SUCCESS;
+                    }
+                    else if(action == "nothing")
+                    {
+                        has_reached_ = false;
+                        return BT::NodeStatus::SUCCESS;
+                    }
+                }
+                if (elapsed > timeout) 
+                {
                     ROS_ERROR("MoveAndCheckPosition: Timeout waiting for stop signal.");
                     return BT::NodeStatus::SUCCESS;
                 }
-
                 rate.sleep();
+                
             }
         }
+        
         // Reset for next tick call
         has_reached_ = false;
         return BT::NodeStatus::SUCCESS;
@@ -138,7 +147,7 @@ public:
         return {BT::InputPort<float>("target_x"),
                 BT::InputPort<float>("target_y"),
                 BT::InputPort<float>("target_z"),
-                BT::InputPort<bool>("is_last")};
+                BT::InputPort<string>("action")};
     }
 
 private:
@@ -149,17 +158,25 @@ private:
     std::vector<std::pair<int, int>> partrol_point_;
     bool has_reached_;
     double odomTime;
-    double vehicleX, vehicleY, vehicleZ;
+    double vehicleX, vehicleY, vehicleZ,center_x ,center_y;
+    std::string action;
+    //uint16_t global_current_hp;
 
-    void stopCallback(const std_msgs::Int8::ConstPtr& msg) {
-        if (msg->data == 1) {
+
+    void stopCallback(const std_msgs::Int8::ConstPtr& msg) 
+    {
+        if (msg->data == 1) 
+        {
             has_reached_ = true;
-        } else {
+        } 
+        else 
+        {
             has_reached_ = false;
         }
     }
 
-   void odom_callback(const nav_msgs::Odometry::ConstPtr& msg) {
+   void odom_callback(const nav_msgs::Odometry::ConstPtr& msg) 
+   {
         odomTime = msg->header.stamp.toSec();
 
         double roll, pitch, yaw;
@@ -169,6 +186,12 @@ private:
         vehicleX = msg->pose.pose.position.x;
         vehicleY = msg->pose.pose.position.y;
         vehicleZ = msg->pose.pose.position.z;
+    }
+
+    bool checkPosition(double current_x, double current_y, double target_x, double target_y, double threshold = 0.6) 
+    {
+        double distance = std::sqrt(std::pow(current_x - target_x, 2) + std::pow(current_y - target_y, 2));
+        return distance <= threshold;
     }
 };
 
@@ -202,9 +225,10 @@ public:
         }
     }
 
-    static BT::PortsList providedPorts() {
-    return {}; // 没有输入或输出端口
-}
+    static BT::PortsList providedPorts() 
+    {
+        return {}; // 没有输入或输出端口
+    }
 
 private:
     ros::NodeHandle nh_;
@@ -287,16 +311,18 @@ public:
         hp_sub_ = nh_.subscribe("/sentry_hp", 5, &CheckHP::hp_callback, this);
     }
 
-    BT::NodeStatus tick() override {
+    BT::NodeStatus tick() override 
+    {
         uint16_t current_hp_copy;
         {
             std::lock_guard<std::mutex> lock(hp_mutex_);
             current_hp_copy = global_current_hp;
         }
-        return current_hp_copy < 400 ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE;
+        return current_hp_copy < 100 ? BT::NodeStatus::SUCCESS : BT::NodeStatus::FAILURE;
     }
 
-    static BT::PortsList providedPorts() {
+    static BT::PortsList providedPorts() 
+    {
         return {};
     }
 
@@ -306,7 +332,8 @@ private:
     ros::Subscriber hp_sub_;
     std::mutex hp_mutex_; // 用于保护 global_current_hp 的互斥锁
 
-    void hp_callback(const std_msgs::UInt16::ConstPtr& msg) {
+    void hp_callback(const std_msgs::UInt16::ConstPtr& msg) 
+    {
         std::lock_guard<std::mutex> lock(hp_mutex_);
         global_current_hp = msg->data;
     }
@@ -329,17 +356,23 @@ static BT::PortsList providedPorts() {
 
 };
 
-class AlwaysRunning : public BT::SyncActionNode { public: AlwaysRunning(const std::string& name, const BT::NodeConfiguration& config) : BT::SyncActionNode(name, config) {}
+class AlwaysRunning : public BT::SyncActionNode 
+{ 
+public: 
+    AlwaysRunning(const std::string& name, const BT::NodeConfiguration& config) : BT::SyncActionNode(name, config) {}
 
-BT::NodeStatus tick() override {
+BT::NodeStatus tick() override 
+{
     return BT::NodeStatus::RUNNING; // 始终返回 RUNNING
 }
 
-static BT::PortsList providedPorts() {
+static BT::PortsList providedPorts() 
+{
     return {}; // 没有输入或输出端口
 }
 
 };
+
 }
 }
 
