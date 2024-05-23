@@ -1,0 +1,10 @@
+<root>
+    <BehaviorTree>
+        <Sequence name="MainSequence">
+            <MoveAndCheckPosition target_x="9.7" target_y="5.1" target_z="0" action="nothing"/><!--去巡逻区-->
+            <MoveAndCheckPosition target_x="9.7" target_y="5.1" target_z="0" action="nothing"/><!--去巡逻区-->
+            <last_do/><!--巡逻-->
+  
+        </Sequence>
+    </BehaviorTree>
+</root>
