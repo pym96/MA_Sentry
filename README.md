@@ -24,6 +24,7 @@ sudo apt install ros-noetic-tf2-sensor-msgs
 sudo apt install ros-noetic-velodyne-gazebo-plugins
 sudo apt-get install libgoogle-glog-dev
 sudo apt install ros-noetic-behaviortree-cpp-v3
+sudo apt install xterm
 ```
 
 Then get into vehicile_simulator file folder
