@@ -7,6 +7,7 @@
 void pathCallback(const nav_msgs::Path::ConstPtr& path_msg) {
     ROS_INFO("Received a path message");
     ROS_INFO("Frame ID: %s", path_msg->header.frame_id.c_str());
+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
 
     // 打印每个路径点的详细信息
     int count = 0;
