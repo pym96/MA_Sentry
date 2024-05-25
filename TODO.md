@@ -1,31 +1,32 @@
 ```c++
-void VelocitySmootherEma::update(const ros::TimerEvent&)
-{
-    // 先执行EMA滤波
-    smoothed_x_vel = alpha_v * x_vel + (1 - alpha_v) * previous_x_vel;
-    smoothed_y_vel = alpha_v * y_vel + (1 - alpha_v) * previous_y_vel;
-    smoothed_w_vel = alpha_w * w_vel + (1 - alpha_w) * previous_w_vel;
+if(utils::in_patrol(vehicleX, vehicleY, 1 , 1)){
+    ros::Time start_time = ros::Time::now();
+    double randX = utils::random_double(-1.5, 1.5);
+    double randY = utils::random_double(-1.5, 1.5);
 
-    // 基于EMA滤波后的速度进行S型曲线调整
-    // 注意: 这里简化了S型曲线调整的逻辑，实际实现时可能需要详细处理
-    // 假设applySCurveAdjustment是一个适应性函数，根据当前速度和目标速度计算逐步调整
-    applySCurveAdjustment(smoothed_x_vel, a_x, J_x);
-    applySCurveAdjustment(smoothed_y_vel, a_y, J_y);
-    applySCurveAdjustment(smoothed_w_vel, a_w, J_w);
+    // 创建并发布 sensor_msgs::Joy 消息
+    sensor_msgs::Joy joy_message;
+    joy_message.header.stamp = ros::Time::now();  // 确保时间戳一致
+    joy_message.header.frame_id = "waypoint_tool";
+    joy_message.axes.resize(8, 0);  // 根据实际情况调整数组大小和默认值
+    joy_message.buttons.resize(11, 0);  // 同上
+    joy_message.buttons[7] = 1;  // 模拟按下一个按钮
+    pub_joy_.publish(joy_message);
 
-    // 更新速度指令
-    cmd_vel_msg_.twist.linear.x = smoothed_x_vel;
-    cmd_vel_msg_.twist.linear.y = smoothed_y_vel;
-    cmd_vel_msg_.twist.angular.z = smoothed_w_vel;
+    // 创建并发布随机 waypoint
+    geometry_msgs::PointStamped random_point;
+    random_point.header.stamp = ros::Time::now();
+    random_point.header.frame_id = "map";
+    random_point.point.x = randX;
+    random_point.point.y = randY;
+    ROS_INFO("Current random point is x:%f, y:%f", randX, randY);
+    way_point_pub_.publish(random_point);
 
-    // 更新前一速度值
-    previous_x_vel = smoothed_x_vel;
-    previous_y_vel = smoothed_y_vel;
-    previous_w_vel = smoothed_w_vel;
+    usleep(10000); // 短暂等待
 
-    // 发布速度指令
-    velocity_pub_.publish(cmd_vel_msg_);
+    return BT::NodeStatus::FAILURE;
 }
+
 
 ```
 
