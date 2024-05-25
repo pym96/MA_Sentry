@@ -12,7 +12,8 @@
 #include "rm_decision/final_decision.hpp" // Make sure this includes the CheckReached node definition
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "behavior_tree_robot");
+    //ros::init(argc, argv, "behavior_tree_robot");
+    ros::init(argc, argv, "rm_decision_final_node");
     ros::NodeHandle nh;
 
     BT::BehaviorTreeFactory factory;
@@ -22,7 +23,10 @@ int main(int argc, char** argv) {
     factory.registerNodeType<ma_decision::bt::last_do>("last_do");
 
     // Create the behavior tree from the XML configuration file
-    auto tree = factory.createTreeFromFile("/home/l/MA/src/rm_control/rm_decision/config/final_tree_2.xml");
+    auto tree = factory.createTreeFromFile("/home/l/MA/src/rm_control/rm_decision/config/final_tree.xml");
+    //auto tree = factory.createTreeFromFile("/home/l/MA/src/rm_control/rm_decision/config/final_tree_2.xml");
+
+
 
     ros::Rate rate(10);
     while (ros::ok()) {

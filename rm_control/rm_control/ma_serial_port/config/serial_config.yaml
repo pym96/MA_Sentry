@@ -4,3 +4,7 @@ ma_serial:
   topic: "cmd_vel"
   time_out: 1000
   debug: true
+  robot_id: 7
+  red_outpost_HP: 300
+  blue_outpost_HP: 100
+  game_time: 3

@@ -1,15 +1,15 @@
 <root>
     <BehaviorTree>
         <Sequence name="MainSequence">
-            <MoveAndCheckPosition target_x="7.7" target_y="5.1" target_z="0" action="nothing"/><!--第一个点会直接超时-->
+            <MoveAndCheckPosition target_x="5" target_y="6" target_z="0" action="nothing"/><!--第一个点会直接超时-->
             
-            <MoveAndCheckPosition target_x="7.7" target_y="5.1" target_z="0" action="nothing"/><!--这才是真正走的第一个点-->
-            
-            <MoveAndCheckPosition target_x="9.2" target_y="5.5" target_z="0" action="fight"/><!--到前哨站前-->
+            <MoveAndCheckPosition target_x="5" target_y="6" target_z="0" action="nothing"/><!--这才是真正走的第一个点-->
 
-            <MoveAndCheckPosition target_x="8.2" target_y="8.5" target_z="0" action="nothing"/><!--回巡逻区的中继点-->
+            <MoveAndCheckPosition target_x="7" target_y="7" target_z="0" action="fight"/><!--到前哨站前-->
 
-            <MoveAndCheckPosition target_x="9.7" target_y="5.1" target_z="0" action="nothing"/><!--回巡逻区-->
+            <MoveAndCheckPosition target_x="5" target_y="6" target_z="0" action="nothing"/><!--回巡逻区的中继点-->
+
+            <MoveAndCheckPosition target_x="4" target_y="5" target_z="0" action="nothing"/><!--回巡逻区-->
 
             <last_do/><!--巡逻-->
   

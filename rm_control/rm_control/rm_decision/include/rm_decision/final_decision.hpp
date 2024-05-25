@@ -63,6 +63,19 @@ public:
        
         if (!has_reached_) 
         {
+                /*if (nh_.getParam("/test_serial/robot_id", robo_id) &&
+                    nh_.getParam("/test_serial/red_outpost_HP", red_outpost_current_hp) &&
+                    nh_.getParam("/test_serial/blue_outpost_HP", blue_outpost_current_hp) &&
+                    nh_.getParam("/test_serial/game_time", game_time)) 
+                {
+                    ROS_INFO("获取成功");
+                } 
+                else 
+                {
+                    ROS_ERROR("Failed to retrieve the port parameter.");
+                    return BT::NodeStatus::FAILURE;
+                }*/
+
             geometry_msgs::PointStamped target_position;
             float target_x, target_y, target_z ;
 
@@ -82,6 +95,7 @@ public:
             target_position.point.z = target_z;
 
             way_point_pub_.publish(target_position);
+            ROS_INFO("PUBLISH position x:%f, y:%f", target_x, target_y);
 
             // Wait for the stop signal or timeout
             ros::Time start_time = ros::Time::now();
@@ -103,6 +117,18 @@ public:
                 if (has_reached_) 
                 {
                     ROS_INFO("MoveAndCheckPosition: Target reached.");
+                    /*if (nh_.getParam("/test_serial/robot_id", robo_id) &&
+                    nh_.getParam("/test_serial/red_outpost_HP", red_outpost_current_hp) &&
+                    nh_.getParam("/test_serial/blue_outpost_HP", blue_outpost_current_hp) &&
+                    nh_.getParam("/test_serial/game_time", game_time)) 
+                    {
+                        ROS_INFO("获取成功");
+                    } 
+                    else 
+                    {
+                        ROS_ERROR("Failed to retrieve the port parameter.");
+                        return BT::NodeStatus::FAILURE;
+                    }*/
                     if(action == "patrol")
                     {
                         double randX = utils::random_double(center_x - 3 , center_x + 3);
@@ -137,25 +163,29 @@ public:
                         {
                             if(red_outpost_current_hp < 200 || blue_outpost_current_hp == 0 || game_time == 4)
                             {
+                                //has_reached_ = false;不写，会出循环
+
                                 return BT::NodeStatus::SUCCESS;
                             }
                             else
                             {
-
+                                ROS_INFO("FIGHT!!!----!!!.");
                             }
                         }
                         else if(robo_id == 107)
                         {
                             if(blue_outpost_current_hp < 200 || red_outpost_current_hp == 0 || game_time == 4)
                             {
+                                //has_reached_ = false;
                                 return BT::NodeStatus::SUCCESS;
                             }
                             else
                             {
-
+                                ROS_INFO("FIGHT!!!----!!!.");
                             }
                         }
                         has_reached_ = false;
+                        //return BT::NodeStatus::FAILURE;会出循环
                     }
                     else if(action == "nothing")
                     {
@@ -163,10 +193,13 @@ public:
                         return BT::NodeStatus::SUCCESS;
                     }
                 }
-                if (elapsed > timeout) 
+                else
                 {
-                    ROS_ERROR("MoveAndCheckPosition: Timeout waiting for stop signal.");
-                    return BT::NodeStatus::SUCCESS;
+                    if (elapsed > timeout) 
+                    {
+                        ROS_ERROR("MoveAndCheckPosition: Timeout waiting for stop signal!!!!!!1.");
+                        return BT::NodeStatus::SUCCESS;
+                    }
                 }
                 rate.sleep();
                 
@@ -199,10 +232,15 @@ private:
     double odomTime;
     double vehicleX, vehicleY, vehicleZ,center_x ,center_y;
     std::string action;
-    uint16_t red_outpost_current_hp;
-    uint16_t blue_outpost_current_hp;
-    uint8_t robo_id;
-    uint16_t game_time;
+    
+    //uint16_t red_outpost_current_hp;
+    //uint16_t blue_outpost_current_hp;
+    //uint8_t robo_id;
+    //uint16_t game_time;
+    int red_outpost_current_hp;
+    int blue_outpost_current_hp;
+    int robo_id;
+    int game_time;
 
     std::mutex hp_mutex_; // 用于保护 global_current_hp 的互斥锁
 
@@ -210,17 +248,20 @@ private:
     {
         std::lock_guard<std::mutex> lock(hp_mutex_);
         red_outpost_current_hp = msg->data;
+        ROS_INFO("Red_outpost_current_hp  :   ");
     }
 
     void blue_hp_callback(const std_msgs::UInt16::ConstPtr& msg) 
     {
         std::lock_guard<std::mutex> lock(hp_mutex_);
         blue_outpost_current_hp = msg->data;
+        ROS_INFO("Blue_outpost_current_hp  :   ");
     }
 
     void id_callback(const std_msgs::Int8::ConstPtr& msg)
     {
         robo_id = msg->data;
+        //ROS_INFO("ID :   ");
     }
 
     void time_callback(const std_msgs::UInt16::ConstPtr& msg)
@@ -331,7 +372,7 @@ private:
         while (ros::ok() && !has_reached_)
         {
             double randX = utils::random_double(centerX - 3, centerX + 3);
-            double randY = utils::random_double(centerY - 3, centerY + 3);
+            double randY = utils::random_double(centerY - 2, centerY + 2);
 
             geometry_msgs::PointStamped random_point;
             random_point.header.stamp = ros::Time::now();

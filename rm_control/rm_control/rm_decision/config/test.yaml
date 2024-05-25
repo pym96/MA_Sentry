@@ -1,0 +1,5 @@
+test_serial:
+  robot_id: 107
+  red_outpost_HP: 190
+  blue_outpost_HP: 200
+  game_time: 3
