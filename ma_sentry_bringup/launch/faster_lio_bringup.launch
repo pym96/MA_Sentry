@@ -34,6 +34,8 @@
     <!-- Launch autonomous exploration development environment config, load terrian analyse, local navigation -->
     <include file="$(find vehicle_simulator)/launch/system_real_robot.launch" />
     <include file="$(find velocity_smoother_ema)/launch/velocity_smoother_ema.launch" />
+
+   
     
 
 

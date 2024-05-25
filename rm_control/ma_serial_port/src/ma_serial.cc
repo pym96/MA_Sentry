@@ -136,14 +136,17 @@ int main(int argc, char** argv) {
     ros::Subscriber sub = nh.subscribe<geometry_msgs::TwistStamped>("/cmd_vel_filtered", 100, cmd_velCallBack);
     ros::Subscriber stop_sub = nh.subscribe<std_msgs::Int8>("/stop", 10, nav_callBack);
     //ROS_INFO("robot_id_msg: %u, red_outpost_HP_msg: %u, blue_outpost_HP_msg: %u, game_time_msg: %u",robot_id_msg.data, red_outpost_HP_msg.data, blue_outpost_HP_msg.data, game_time_msg.data);
-    ros::Rate(100);
+    ros::Rate rate(100);
     while(ros::ok)
     {
         robot_id_pub.publish(robot_id_msg);
+        //ROS_INFO("robot_id : %u", robot_id_msg.data);
         red_outpost_HP_pub.publish(red_outpost_HP_msg);
         blue_outpost_HP_pub.publish(blue_outpost_HP_msg);
         game_time_pub.publish(game_time_msg);
-        ros::spin();
+
+        ros::spinOnce();  // 处理一次回调
+        rate.sleep();     // 根据Rate对象设定的频率休眠
     }
     
 

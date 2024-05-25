@@ -16,6 +16,9 @@
 
 #include <vector>
 #include <random>
+#include <string>
+
+using namespace std;
 
 namespace ma_decision{
 
@@ -46,6 +49,11 @@ public:
         way_point_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/way_point", 10);
         stop_sub_ = nh_.subscribe("/stop", 10, &MoveAndCheckPosition::stopCallback, this);
         odom_sub_ = nh_.subscribe<nav_msgs::Odometry>("/state_estimation", 5, &MoveAndCheckPosition::odom_callback, this);
+
+        robot_id_sub = nh_.subscribe("/robot_id", 10, &MoveAndCheckPosition::robot_id_callback, this);
+        red_outpost_HP_sub = nh_.subscribe("/red_outpost_HP", 10, &MoveAndCheckPosition::red_outpost_HP_callback, this);
+        blue_outpost_HP_sub = nh_.subscribe("/blue_outpost_HP", 10, &MoveAndCheckPosition::blue_outpost_HP_callback, this);
+        game_time_sub = nh_.subscribe("/game_time", 10, &MoveAndCheckPosition::game_time_callback, this);
     }
 
     BT::NodeStatus tick() override {
@@ -53,6 +61,141 @@ public:
         // TODO: Getting current position and use in_patrol()
         // if yes,  then random use and return FAILURE, publish random way point
         // else, then do nothing.
+
+geometry_msgs::PointStamped target_position;
+            float target_x, target_y, target_z;
+            string action;
+    if (!getInput<float>("target_x", target_x) || 
+        !getInput<float>("target_y", target_y) ||
+        !getInput<float>("target_z", target_z) ||
+        !getInput<string>("action",action)) {
+        ROS_ERROR("MoveAndCheckPosition: Missing target_position input");
+        return BT::NodeStatus::FAILURE;
+    }
+    if(action == "patrol")//最好在前边加个靠近巡逻区的中间点
+    {
+        while(ros::ok)
+        {
+            ros::Time start_time = ros::Time::now();
+            double randX = utils::random_double(-1.5, 1.5);
+            double randY = utils::random_double(-1.5, 1.5);
+            geometry_msgs::PointStamped random_point;
+            random_point.header.stamp = ros::Time::now();
+            random_point.header.frame_id = "map"; 
+            random_point.point.x = randX;
+            random_point.point.y = randY;
+            ROS_INFO("Current random point is x:%f, y:%f", randX, randY);
+            way_point_pub_.publish(random_point);
+            while(ros::ok())
+            {
+                double elapsed = (ros::Time::now() - start_time).toSec();
+                if (elapsed > 3.0) 
+                    break;
+                else   
+                    continue;
+                
+            }
+        }
+    }
+    else if(action == "nothing")
+    {
+        ROS_INFO("Current position x:%f, y:%f", target_x, target_y);
+        target_position.header.stamp = ros::Time::now();
+        target_position.header.frame_id = "map";
+        target_position.point.x = target_x;
+        target_position.point.y = target_y;
+        target_position.point.z = target_z;
+
+        way_point_pub_.publish(target_position);
+
+        ros::Time start_time = ros::Time::now();
+        ros::Rate rate(100); // 100 Hz
+        const double timeout = 10.0; // Timeout after 10 seconds
+
+
+        while (ros::ok()) 
+        {
+            ros::spinOnce();
+            double elapsed = (ros::Time::now() - start_time).toSec();
+
+            //ROS_INFO("robot_id : %u", robot_id_.data);
+
+            if (has_reached_) 
+            {
+                return BT::NodeStatus::SUCCESS;
+            }
+            if (elapsed > timeout) 
+            {
+                ROS_ERROR("MoveAndCheckPosition: Timeout waiting for stop signal!!!!.");
+                return BT::NodeStatus::SUCCESS;
+            }
+
+        }
+    }
+    else if(action == "fight")
+    {
+        ROS_INFO("Current position x:%f, y:%f", target_x, target_y);
+        target_position.header.stamp = ros::Time::now();
+        target_position.header.frame_id = "map";
+        target_position.point.x = target_x;
+        target_position.point.y = target_y;
+        target_position.point.z = target_z;
+
+        way_point_pub_.publish(target_position);
+
+        ros::Time start_time = ros::Time::now();
+        ros::Rate rate(100); // 100 Hz
+        const double timeout = 10.0; // Timeout after 10 seconds
+
+        while (ros::ok()) //10秒
+        {
+            ros::spinOnce();
+            double elapsed = (ros::Time::now() - start_time).toSec();
+
+            if (elapsed > timeout) //没到前哨战，超时了
+            {
+                ROS_ERROR("MoveAndCheckPosition: Timeout waiting for stop signal!!!!.");
+                return BT::NodeStatus::SUCCESS;
+            }
+
+            if (has_reached_) //10秒之内到了
+            {
+                ros::Rate rate(100);
+                while(ros::ok())//一支循环不动   战斗
+                {
+                    ros::spinOnce();
+                    if(robot_id_.data == 7)
+                    {
+                        if(red_outpost_HP_.data <= 200 || blue_outpost_HP_.data == 0 || game_time_.data == 4)//直到
+                        {
+                            return BT::NodeStatus::SUCCESS;
+                        }
+                        else
+                        {
+                            ROS_INFO("FIGHT!!!");
+                        }
+                    }
+                    else if(robot_id_.data == 107)
+                    {
+                        if(blue_outpost_HP_.data <= -1 || red_outpost_HP_.data == 1 || game_time_.data == 4)
+                        {
+                            return BT::NodeStatus::SUCCESS;
+                        }
+                        else
+                        {
+                            ROS_INFO("FIGHT!!!");
+                        }
+                    }
+                    
+                }
+                
+            }
+    
+
+        }
+    }
+
+        /*
     if(utils::in_patrol(vehicleX, vehicleY, 1 , 1)){
             // Publishing random point. But how?
             // Generate a random point within bounds (-1, 1) for x, and (-2, 2) for y
@@ -87,13 +230,15 @@ public:
 
             return BT::NodeStatus::FAILURE;
         }
-        else if (!has_reached_) {
+        else *//*if (!has_reached_) {
             geometry_msgs::PointStamped target_position;
             float target_x, target_y, target_z;
+            string action;
 
             if (!getInput<float>("target_x", target_x) || 
                 !getInput<float>("target_y", target_y) ||
-                !getInput<float>("target_z", target_z)) {
+                !getInput<float>("target_z", target_z) ||
+                !getInput<string>("action",action)) {
                 ROS_ERROR("MoveAndCheckPosition: Missing target_position input");
                 return BT::NodeStatus::FAILURE;
             }
@@ -110,34 +255,98 @@ public:
             // Wait for the stop signal or timeout
             ros::Time start_time = ros::Time::now();
             ros::Rate rate(100); // 100 Hz
-            const double timeout = 20.0; // Timeout after 10 seconds
+            const double timeout = 10.0; // Timeout after 10 seconds
 
-            while (ros::ok()) {
+
+            while (ros::ok()) 
+            {
                 ros::spinOnce();
                 double elapsed = (ros::Time::now() - start_time).toSec();
 
-                if (has_reached_) {
+                //ROS_INFO("robot_id : %u", robot_id_.data);
+
+                if (has_reached_) 
+                {
                     ROS_INFO("MoveAndCheckPosition: Target reached.");
-                    return BT::NodeStatus::SUCCESS;
+                    if(action == "patrol")
+                    {
+                        ros::Time start_time = ros::Time::now();
+                        double randX = utils::random_double(-1.5, 1.5);
+                        double randY = utils::random_double(-1.5, 1.5);
+
+                        geometry_msgs::PointStamped random_point;
+                        random_point.header.stamp = ros::Time::now();
+                        random_point.header.frame_id = "map"; 
+                        random_point.point.x = randX;
+                        random_point.point.y = randY;
+                        ROS_INFO("Current random point is x:%f, y:%f", randX, randY);
+
+                        way_point_pub_.publish(random_point);
+            
+                        while(ros::ok())
+                        {
+                            double elapsed = (ros::Time::now() - start_time).toSec();
+
+                            if (elapsed > 3.0) 
+                                break;
+                            else   
+                                continue;
+                            
+                        }
+
+                        //return BT::NodeStatus::FAILURE;
+                    }
+                    else if(action == "nothing")
+                    {
+                        ROS_INFO("NOTHING!!!");
+                        return BT::NodeStatus::SUCCESS;
+                    }
+                    else if(action == "fight")
+                    {
+                        //ROS_INFO("robot_id : %u", robot_id_.data);
+                        if(robot_id_.data == 7)
+                        {
+                            if(red_outpost_HP_.data <= 200 || blue_outpost_HP_.data == 0 || game_time_.data == 4)
+                            {
+                                return BT::NodeStatus::SUCCESS;
+                            }
+                            else
+                            {
+                                ROS_INFO("FIGHT!!!");
+                            }
+                        }
+                        else if(robot_id_.data == 107)
+                        {
+                            if(blue_outpost_HP_.data <= 200 || red_outpost_HP_.data == 0 || game_time_.data == 4)
+                            {
+                                return BT::NodeStatus::SUCCESS;
+                            }
+                            else
+                            {
+                                ROS_INFO("FIGHT!!!");
+                            }
+                        }
+                    }
                 }
 
                 if (elapsed > timeout) {
-                    ROS_ERROR("MoveAndCheckPosition: Timeout waiting for stop signal.");
+                    ROS_ERROR("MoveAndCheckPosition: Timeout waiting for stop signal!!!!.");
                     return BT::NodeStatus::SUCCESS;
                 }
 
                 rate.sleep();
             }
-        }
         // Reset for next tick call
         has_reached_ = false;
         return BT::NodeStatus::SUCCESS;
+    }*/
     }
 
     static BT::PortsList providedPorts() {
         return {BT::InputPort<float>("target_x"),
                 BT::InputPort<float>("target_y"),
-                BT::InputPort<float>("target_z")};
+                BT::InputPort<float>("target_z"),
+                BT::InputPort<string>("action")};
     }
 
 private:
@@ -145,10 +354,22 @@ private:
     ros::Publisher way_point_pub_;
     ros::Subscriber stop_sub_;
     ros::Subscriber odom_sub_;
+    ros::Subscriber robot_id_sub;
+    ros::Subscriber red_outpost_HP_sub;
+    ros::Subscriber blue_outpost_HP_sub;
+    ros::Subscriber game_time_sub;
     std::vector<std::pair<int, int>> partrol_point_;
     bool has_reached_;
     double odomTime;
     double vehicleX, vehicleY, vehicleZ;
+    std_msgs::Int8 robot_id_;
+    std_msgs::UInt16 red_outpost_HP_;
+    std_msgs::UInt16 blue_outpost_HP_;
+    std_msgs::UInt16 game_time_;
+    //int robot_id_;
+    //int red_outpost_HP_;
+    //int blue_outpost_HP_;
+    //int game_time_;
 
     void stopCallback(const std_msgs::Int8::ConstPtr& msg) {
         if (msg->data == 1) {
@@ -168,6 +389,29 @@ private:
         vehicleX = msg->pose.pose.position.x;
         vehicleY = msg->pose.pose.position.y;
         vehicleZ = msg->pose.pose.position.z;
+
+        //ROS_INFO("odom_callback         ");
+    }
+
+    void robot_id_callback(const std_msgs::Int8::ConstPtr& msg)
+    {
+        robot_id_.data = msg->data;
+        //ROS_INFO("robot_id : %u" , robot_id_.data);
+    }
+
+    void red_outpost_HP_callback(const std_msgs::UInt16::ConstPtr& msg)
+    {
+        red_outpost_HP_.data = msg->data;
+    }
+
+    void blue_outpost_HP_callback(const std_msgs::UInt16::ConstPtr& msg)
+    {
+        blue_outpost_HP_.data = msg->data;
+    }
+
+    void game_time_callback(const std_msgs::UInt16::ConstPtr& msg)
+    {
+        game_time_.data = msg->data;
     }
 };
 
