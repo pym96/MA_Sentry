@@ -27,7 +27,11 @@ struct SendPacket{
 */
 struct ReceivePacket{
    uint8_t head = 0x5A;
-   uint16_t sentry_hp;
+   uint8_t robot_id;
+   uint16_t sentry_HP;
+   uint16_t red_outpost_HP;
+   uint16_t blue_outpost_HP;
+   uint16_t game_time;
    uint16_t checksum = 0;
 }__attribute__((packed));
 

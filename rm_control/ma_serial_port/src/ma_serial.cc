@@ -19,6 +19,11 @@ std::thread receive_thread_;
 
 using ReceivePacket = ma_serial_packet::ReceivePacket;
 
+std_msgs::Int8 robot_id_msg;
+std_msgs::UInt16 red_outpost_HP_msg;
+std_msgs::UInt16 blue_outpost_HP_msg;
+std_msgs::UInt16 game_time_msg;
+
 void cmd_velCallBack(const geometry_msgs::TwistStamped::ConstPtr& msg) {
     try {
         ma_serial_packet::SendPacket packet;
@@ -67,6 +72,12 @@ void receiveData() {
 
                 if (crc16::verify_crc16_checksum(reinterpret_cast<uint8_t*>(packet), sizeof(ReceivePacket))) {
                     // Process packet data
+                    robot_id_msg.data = packet->robot_id;
+                    red_outpost_HP_msg.data = packet->red_outpost_HP;
+                    blue_outpost_HP_msg.data = packet->blue_outpost_HP;
+                    game_time_msg.data = packet->game_time;
+                    // ROS_INFO("robot_id_msg: %u, red_outpost_HP_msg: %u, blue_outpost_HP_msg: %u, game_time_msg: %u",robot_id_msg.data, red_outpost_HP_msg.data, blue_outpost_HP_msg.data, game_time_msg.data);
+                    
                 } else {
                     ROS_ERROR("CRC error!");
                 }
@@ -80,6 +91,11 @@ void receiveData() {
 int main(int argc, char** argv) {
     ros::init(argc, argv, "ma_serial");
     ros::NodeHandle nh("~");
+
+    ros::Publisher robot_id_pub = nh.advertise<std_msgs::Int8>("/robot_id",50);
+    ros::Publisher red_outpost_HP_pub = nh.advertise<std_msgs::UInt16>("/red_outpost_HP",50);
+    ros::Publisher blue_outpost_HP_pub = nh.advertise<std_msgs::UInt16>("/blue_outpost_HP",50);
+    ros::Publisher game_time_pub = nh.advertise<std_msgs::UInt16>("/game_time",50);
 
     std::string port;
     int baud_rate, time_out;
@@ -115,11 +131,22 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    
     ros::Publisher pub = nh.advertise<std_msgs::UInt16>("/ma_vel", 50);
-    ros::Subscriber sub = nh.subscribe<geometry_msgs::TwistStamped>("/cmd_vel", 100, cmd_velCallBack);
+    ros::Subscriber sub = nh.subscribe<geometry_msgs::TwistStamped>("/cmd_vel_filtered", 100, cmd_velCallBack);
     ros::Subscriber stop_sub = nh.subscribe<std_msgs::Int8>("/stop", 10, nav_callBack);
+    //ROS_INFO("robot_id_msg: %u, red_outpost_HP_msg: %u, blue_outpost_HP_msg: %u, game_time_msg: %u",robot_id_msg.data, red_outpost_HP_msg.data, blue_outpost_HP_msg.data, game_time_msg.data);
+    ros::Rate(100);
+    while(ros::ok)
+    {
+        robot_id_pub.publish(robot_id_msg);
+        red_outpost_HP_pub.publish(red_outpost_HP_msg);
+        blue_outpost_HP_pub.publish(blue_outpost_HP_msg);
+        game_time_pub.publish(game_time_msg);
+        ros::spin();
+    }
+    
 
-    ros::spin();
 
     return 0;
 }

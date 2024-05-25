@@ -1,2 +1,0 @@
-library 'continuous_integration_pipeline'
-ciPipeline("--dependencies 'git@github.com:leggedrobotics/libnabo.git;master;git'")

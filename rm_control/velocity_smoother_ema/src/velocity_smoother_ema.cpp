@@ -4,11 +4,11 @@ VelocitySmootherEma::VelocitySmootherEma(ros::NodeHandle* nh):nh_(*nh)
 {
     nh_.param<double>("/alpha_v", alpha_v, 0.4);
     nh_.param<double>("/alpha_w", alpha_w, 0.4);
-    nh_.param<std::string>("/raw_cmd_topic", raw_cmd_topic, "raw_cmd_vel");
-    nh_.param<std::string>("/cmd_topic", cmd_topic, "cmd_vel");
+    nh_.param<std::string>("/raw_cmd_topic", raw_cmd_topic, "cmd_vel");
+    nh_.param<std::string>("/cmd_topic", cmd_topic, "cmd_vel_filtered");
     nh_.param<double>("/cmd_rate", cmd_rate, 30.0);
     nh_.param<int>("/stop_counter", stop_counter, 3);
-    nh_.param<double>("maxAccel", max_accel, 0.7);
+    nh_.param<double>("/max_accel", max_accel, 3.0);
 
 
     velocity_sub_ = nh_.subscribe(raw_cmd_topic, 10, &VelocitySmootherEma::twist_callback, this);
