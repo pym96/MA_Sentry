@@ -39,4 +39,4 @@ If you met the bug below:
 just compile it again, then all things will be ok(normally......)
 
 ## Attention
-Branch main is chaos, and branch final is normal.
+Branch main is chaos, BUT branch final is normal.
