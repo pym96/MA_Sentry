@@ -1,6 +1,0 @@
-<launch>
-
-  <node pkg="tf" type="static_transform_publisher" name="map2odom" args="0 0 0 0 0 0 /map /odom 1000" />
-
-
-</launch>
