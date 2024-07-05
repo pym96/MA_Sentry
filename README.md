@@ -16,6 +16,10 @@ sudo make install
 
 **and invert your lidar**.
 
+## How to clone
+```
+git clone -b final https://github.com/pym96/MA_Sentry.git
+```
 
 ## config
 ```
