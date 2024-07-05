@@ -14,6 +14,8 @@ make
 sudo make install
 ```
 
+**and invert your lidar**.
+
 
 ## config
 ```
