@@ -1,5 +1,0 @@
-<root>
-    <BehaviorTree>
-        <PatrolAction name="patrol" />
-    </BehaviorTree>
-</root>

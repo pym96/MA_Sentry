@@ -1,8 +1,0 @@
-<launch>
-
-    <!-- Load parameters -->
-    <rosparam file="$(find ma_serial_port)/config/serial_config.yaml"/>
-
-    <node name="msg_pub" pkg="ma_serial_port" type="ma_serial_port_node" output="screen"/>
-
-</launch>
