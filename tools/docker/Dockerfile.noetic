@@ -1,0 +1,21 @@
+FROM ros:noetic-ros-base-focal@sha256:72b8bc59035dc0a5b8e07aae28c16caa84192971d72d207c72ed734fb1d5e97d
+
+RUN sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g; s|http://security.ubuntu.com|https://security.ubuntu.com|g' /etc/apt/sources.list \
+    && apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 update && DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 install -y --no-install-recommends \
+    build-essential cmake git libusb-dev libgoogle-glog-dev libyaml-cpp-dev libtbb-dev \
+    ros-noetic-serial ros-noetic-tf2-sensor-msgs ros-noetic-behaviortree-cpp-v3 \
+    ros-noetic-pcl-ros ros-noetic-eigen-conversions ros-noetic-rviz \
+    ros-noetic-gazebo-ros ros-noetic-gazebo-plugins ros-noetic-roslint \
+    ros-noetic-diagnostic-updater ros-noetic-xacro \
+    ros-noetic-joint-state-publisher-gui ros-noetic-robot-state-publisher \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG LIVOX_SDK_REF=a19db9e2af9c4b112b80270a4afe7845238aff80
+RUN git clone https://github.com/pym96/Livox-SDK2.git /opt/Livox-SDK2 \
+    && git -C /opt/Livox-SDK2 checkout "$LIVOX_SDK_REF" \
+    && cmake -S /opt/Livox-SDK2 -B /opt/Livox-SDK2/build -DCMAKE_BUILD_TYPE=Release \
+    && cmake --build /opt/Livox-SDK2/build -j2 \
+    && cmake --install /opt/Livox-SDK2/build \
+    && ldconfig
+
+WORKDIR /ws
