@@ -1,0 +1,4 @@
+<launch>
+ <include file="$(find ma_sentry_bringup)/launch/ma_2d_robot.launch" />
+ <include file="$(find ma_sentry_bringup)/launch/ma_2d_robot_nav.launch" />
+</launch>

@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot
+  name="ma_sentry_urdf">
+
+   <link name="base_link">
+    <origin 
+      xyz="0 0 0" 
+      rpy="0 0 0" />
+  </link>
+
+  <joint name="chassis_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="chassis" />
+        <origin xyz="-0.1 0 0" />
+  </joint> 
+
+  <link
+    name="chassis">
+    <inertial>
+      <origin 
+        xyz="0.0 0.0 0.0"
+        rpy="0 0 0" />
+      <mass
+        value="10.8087193664072" />
+      <inertia
+        ixx="0.0214677517054228"
+        ixy="-0.000193020417837888"
+        ixz="8.27218748111831E-05"
+        iyy="0.0255926993380979"
+        iyz="-8.0111099445782E-05"
+        izz="0.0121455057214487" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="left_front_wheel_Link">
+    <inertial>
+      <origin
+        xyz="0.00620923170793747 -0.000547653647351432 0.00828135869405194"
+        rpy="0 0 0" />
+      <mass
+        value="0.332440985195605" />
+      <inertia
+        ixx="0.000155022617525618"
+        ixy="-1.23737063836232E-06"
+        ixz="-7.45388993583784E-20"
+        iyy="0.000160803958052241"
+        iyz="-2.03287907341032E-20"
+        izz="0.00030759824693908" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/1_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/1_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="1"
+    type="continuous">
+    <origin
+      xyz="-0.142966408792554 -0.485966408792549 -0.0174999999992187"
+      rpy="-1.5707963267949 -0.261799387799134 -0.785398163397454" />
+    <parent
+      link="chassis" />
+    <child
+      link="left_front_wheel_Link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="right_front_wheel_Link">
+    <inertial>
+      <origin
+        xyz="0.00540813251669661 -0.0618677129623183 -0.00959296954912124"
+        rpy="0 0 0" />
+      <mass
+        value="0.272373357196352" />
+      <inertia
+        ixx="0.00029133481281256"
+        ixy="3.48130381346589E-05"
+        ixz="-2.78493445186512E-07"
+        iyy="0.000160352347453317"
+        iyz="1.11723875949642E-06"
+        izz="0.000155226838194564" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/1_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/1_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="2"
+    type="continuous">
+    <origin
+      xyz="-0.101925545684657 0.0131285922440031 0.0267999263561746"
+      rpy="-1.5707963267949 1.10680467313487 -0.785398163397454" />
+    <parent
+      link="chassis" />
+    <child
+      link="right_front_wheel_Link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="right_back_wheel_Link">
+    <inertial>
+      <origin
+        xyz="8.61533397830683E-06 -1.49221961713991E-05 0.00811341709646876"
+        rpy="0 0 0" />
+      <mass
+        value="0.405088777295711" />
+      <inertia
+        ixx="0.000163343390473993"
+        ixy="-1.28128815286042E-06"
+        ixz="3.59141969635823E-19"
+        iyy="0.000164822894593924"
+        iyz="-2.10064170919066E-19"
+        izz="0.000318778294539942" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/1_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/1_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="3"
+    type="continuous">
+    <origin
+      xyz="0.31296640879255 -0.0300335912074498 -0.0174999999989849"
+      rpy="1.57079632679489 0.261799387799135 -0.785398163397455" />
+    <parent
+      link="chassis" />
+    <child
+      link="right_back_wheel_Link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="left_back_wheel_Link">
+    <inertial>
+      <origin
+        xyz="-5.04787255499461E-06 -0.0171154756404496 1.51610025517779E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.436812880165245" />
+      <inertia
+        ixx="0.000164732470196718"
+        ixy="-7.45388993583784E-20"
+        ixz="-8.8688783709155E-07"
+        iyy="0.000321751700567641"
+        iyz="-2.16840434497101E-19"
+        izz="0.000167100897865302" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/1_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.647058823529412 0.619607843137255 0.588235294117647 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/1_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="4"
+    type="continuous">
+    <origin
+      xyz="0.293874525700515 -0.466874525700513 -0.0174999999993333"
+      rpy="0 1.10680467313487 0.785398163397453" />
+    <parent
+      link="chassis" />
+    <child
+      link="left_back_wheel_Link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="gimbal_Link">
+    <inertial>
+      <origin
+        xyz="0.0104546135318662 -0.0225665209249179 0.193242622446725"
+        rpy="0 0 0" />
+      <mass
+        value="2.73797674659914" />
+      <inertia
+        ixx="0.00364732194053317"
+        ixy="0.000204823881170349"
+        ixz="-4.54373025878538E-06"
+        iyy="0.00362130537534912"
+        iyz="3.23303357836508E-05"
+        izz="0.00320257740623965" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/5_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://ma_sentry_urdf/meshes/5_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="5"
+    type="fixed">
+    <origin
+      xyz="0.0349669631523045 -0.469191134339959 0.272499999999991"
+      rpy="1.57079632679487 0 2.92740365895619" />
+    <parent
+      link="chassis" />
+    <child
+      link="gimbal_Link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>

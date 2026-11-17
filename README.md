@@ -18,7 +18,7 @@ sudo make install
 
 ## How to clone
 ```
-git clone -b final https://github.com/pym96/MA_Sentry.git
+git clone https://github.com/pym96/MA_Sentry.git
 ```
 
 ## config
@@ -44,5 +44,5 @@ If you met the bug below:
 
 just compile it again, then all things will be ok(normally......)
 
-## Attention
-Branch main is chaos, BUT branch final is normal.
+## Branch
+The project source is consolidated on `main`.

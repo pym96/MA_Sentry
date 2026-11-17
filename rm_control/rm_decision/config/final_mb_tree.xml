@@ -1,0 +1,21 @@
+<root>
+    <BehaviorTree>
+        <Sequence name="MainSequence">
+            <MoveAndCheckPosition target_x="1.0" target_y="1.0" />
+            <MoveAndCheckPosition target_x="2.0" target_y="2.0" />
+            <MoveAndCheckPosition target_x="-1.0" target_y="-1.0" />
+            <MoveAndCheckPosition target_x="-2.0" target_y="-2.0" />
+       
+            <!-- <CheckHP/>
+            <Fallback name="CheckHealthFallback">
+                <Sequence name="LowHealthSequence">
+                    <CheckHP/>
+                    <MoveAndCheckPosition target_x="0.0" target_y="2.0" target_z="-2.0"/>
+                    <Wait duration="5"/>
+                    <MoveAndCheckPosition target_x="1.5" target_y="0.0" target_z="0"/>
+                </Sequence>
+                <AlwaysRunning/> 
+            </Fallback> -->
+        </Sequence>
+    </BehaviorTree>
+</root>

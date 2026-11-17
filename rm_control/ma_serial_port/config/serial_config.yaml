@@ -1,0 +1,6 @@
+ma_serial:
+  port: "/dev/ttyACM0"
+  baud_rate: 115200
+  topic: "cmd_vel"
+  time_out: 1000
+  debug: true

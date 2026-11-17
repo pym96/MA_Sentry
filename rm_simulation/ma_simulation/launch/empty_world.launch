@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<launch>
+
+    <arg name="gui" defalut="true" />
+    <arg name="world_name" defalut="" />  <!-- Can be an absolute path here-->
+    
+    <arg name="x_pos" defalut="0.0" />
+    <arg name="y_pos" defalut="0.0" />
+    <arg name="yaw_pos" defalut="0.0" />
+    
+    <arg name="tf_prefix" defalut="" doc="tf_prefix to be used by gazebo and in the robot's urdf etc" />
+
+    <arg name="namespace" defalut="$(arg tf_prefix)" doc="Namespace to push all topics into" />
+
+    <!-- Load world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(arg world_name)" />
+        <arg name="paused" value="true" />
+        <arg name="gui" value="$(arg gui)" />
+    </include>
+
+    <!-- Spawn robot and bring up controllers etc -->
+    <include file="$(find ma_simulation)/launch/gazebo_common.launch">
+
+    </include>
+
+<launch>

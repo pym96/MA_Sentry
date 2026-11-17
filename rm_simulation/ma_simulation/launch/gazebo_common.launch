@@ -1,0 +1,43 @@
+<?xml verison="1.0" ?>
+<launch>
+    <arg name="x_pos" defalut="0.0" />
+    <arg name="y_pos" defalut="0.0" />
+    <arg name="yaw_pos" defalut="0.0" />
+
+    <arg name="tf_prefix" defalut="" />
+    
+  <!-- Load dobot model -->
+  <param name="robot_description" command="$(find xacro)/xacro '$(find ma_simulation)/urdf/base_car.urdf.xacro'" /> 
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-unpause -urdf -param robot_description -model mobile_base -x $(arg x_pos) -y $(arg y_pos) -Y $(arg yaw_pos)" respawn="false" />
+
+    <!-- Load ros_control controller config -->
+   <rosparam file="$(find ma_simulation)/config/joint_state_controller.yaml" command="load" />
+   <rosparam file="$(find ma_simulation)/config/diffdrive_controller.yaml" command="load" subst_value="true" />
+
+   <!-- Start the controllers -->
+   <node name="controller_spawner" pkg="controller_manager" type="spawner" output="screen"
+         args="joint_state_controller mobile_base_controller"/>
+    
+    <!-- EKF -->
+    <include file="$(find ma_simulation)/launch/includes/ekf.launch.xml">
+        <arg name="tf_prefix" value="$(arg prefix)" />
+    </include>
+
+    <!-- Add passive + mimic joints to joint_states topic -->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <rosparam param="source_list">[joint_states]</rosparam>
+        <param name="rate" value="200.0" />
+    </node>
+
+    <!-- Load teleop -->
+    <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+        <param name="default_topic" value="cmd_vel" />
+        <param name="default_vx_max" value="1.0" />
+        <param name="default_vx_min" value="-1.0" />
+        <param name="default_vw_max" value="1.5" />
+        <param name="default_vw_min" value="-1.5" />
+    </node>
+
+    <!-- Create combined scan topic, maybe 2 lidars will need this -->
+
+</launch>
