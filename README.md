@@ -51,19 +51,13 @@ cd ~/catkin_ws
 catkin_make -j2 -l2 -DCMAKE_BUILD_TYPE=Release
 ```
 
-The manifest selection is required: without `package.xml`, catkin silently skips
-`livox_ros_driver2`. A successful build of the other packages is not a complete
-workspace check. If compilation fails, preserve the first error and dependency
-versions; repeating the build alone is not a general fix.
+Copying `package_ROS1.xml` to `package.xml` selects the ROS 1 Livox driver.
 
-## Branch
-The project source is consolidated on `main`.
+## Build with Docker (macOS / Linux)
 
-## Docker compile check (Ubuntu 20.04 / ROS Noetic)
-
-On Apple Silicon, select `linux/amd64` explicitly to check the original x86-64
-Linux build under Docker Desktop emulation. This compiles the workspace; it does
-not validate Gazebo rendering, USB/serial access, lidar input, or robot behavior.
+Install and start Docker Desktop on macOS, or Docker Engine on Linux.
+On Apple Silicon, use `linux/amd64` to build in an x86-64 Ubuntu 20.04 / ROS Noetic
+environment through emulation.
 
 Run from the repository root:
 
@@ -79,4 +73,4 @@ Livox SDK revision. Source is copied into `/ws/src/MA_Sentry` inside the contain
 build outputs do not modify the host checkout. Save the command output if needed:
 the `--rm` container and its build outputs are removed when it exits.
 
-See [build scope and known runtime issues](tools/docker/README.md) before deployment.
+See [Docker configuration](tools/docker/README.md) for resource settings.
